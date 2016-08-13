@@ -119,7 +119,7 @@ namespace GitSpect.Cmd
                     };
                     break;
                 case "tree":
-                    newObject = CreateNewTree(catFileNiceResult);
+                    newObject = CreateNewTree(fullName, catFileNiceResult);
                     break;
                 case "blob":
                     Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
@@ -140,11 +140,10 @@ namespace GitSpect.Cmd
         }
 
             
-        private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
+        private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult)
         {
             int index = 0;
             int numLines = catFileNiceResult.Length;
-            //string[,] metadataMatrix = new string[numLines,3];
             List<TreeInternalData> blobs = new List<TreeInternalData>();
             List<TreeInternalData> trees = new List<TreeInternalData>();
 
@@ -179,6 +178,7 @@ namespace GitSpect.Cmd
             GitObject newTree = new Tree()
             {
                 Blobs = blobs,
+                SHA = sha,
                 Trees = trees
             };
 
