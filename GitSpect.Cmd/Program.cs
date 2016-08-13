@@ -12,16 +12,17 @@ namespace GitSpect.Cmd
     {
         private const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private static Dictionary<string, GitObject> _graphDictionary;
+        private static IEnumerable<PSObject> gitObjectHints;
 
         static void Main(string[] args)
         {
             _graphDictionary = new Dictionary<string, GitObject>();
-            IEnumerable<PSObject> gitObjectHeaders;
+            IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
             string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
-            gitObjectHeaders = ExecuteCommand(command);
+            gitObjectHints = ExecuteCommand(command);
 
             Stopwatch allObjsTimer = new Stopwatch();
             allObjsTimer.Start();
