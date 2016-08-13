@@ -97,7 +97,7 @@ namespace GitSpect.Cmd
                     newObject = CreateNewTree(catFileNiceResult);
                     break;
                 case "blob":
-                    Blob.WriteRawBlobToDisk(catFileNiceResult);
+                    Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
                     newObject = new Blob()
                     {
                         SHA = fullName
