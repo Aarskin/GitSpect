@@ -108,15 +108,7 @@ namespace GitSpect.Cmd
             switch (objectType)
             {
                 case "commit":
-                    newObject = new Commit()
-                    {
-                        SHA = fullName,
-                        Tree = (string)catFileNiceResult[0].BaseObject,
-                        Parent = (string)catFileNiceResult[1].BaseObject,
-                        Author = (string)catFileNiceResult[2].BaseObject,
-                        Committer = (string)catFileNiceResult[3].BaseObject,
-                        Message = (string)catFileNiceResult[5].BaseObject,
-                    };
+                    newObject = CreateNewCommit();
                     break;
                 case "tree":
                     newObject = CreateNewTree(fullName, catFileNiceResult);
@@ -139,7 +131,28 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
-            
+        private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit)
+        {
+            Commit retVal;
+
+            switch(rawCommit.Length)
+            {
+                case 
+            }
+
+            retVal = new Commit()
+            {
+                SHA = sha,
+                Tree = (string)rawCommit[0].BaseObject,
+                Parent = (string)rawCommit[1].BaseObject,
+                Author = (string)rawCommit[2].BaseObject,
+                Committer = (string)rawCommit[3].BaseObject,
+                Message = (string)rawCommit[5].BaseObject,
+            };
+
+            return retVal;
+        }
+
         private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult)
         {
             int index = 0;
