@@ -17,7 +17,11 @@ namespace GitSpect.Cmd
             string path = Path.Combine(Program.OBJECT_BASE, folder, name);
             string[] lines = catFileNiceResult.Select(x => x.ToString()).ToArray();
 
-            File.AppendAllLines(path, lines);
+            if(!File.Exists(path))
+            {
+                // Only create the path if necessary
+                File.AppendAllLines(path, lines);
+            }
         }
     }
 }
