@@ -104,7 +104,7 @@ namespace GitSpect.Cmd
                     };
                     break;
                 default:
-                    newObject = new Blob
+                    newObject = new Blob()
                     {
 
                     };
