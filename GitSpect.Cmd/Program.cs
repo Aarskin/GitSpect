@@ -147,31 +147,33 @@ namespace GitSpect.Cmd
         {
             int index = 0;
             int numLines = catFileNiceResult.Length;
-            string[,] metadataMatrix = new string[numLines,3];
+            //string[,] metadataMatrix = new string[numLines,3];
+            List<TreeInternalData> blobs = new List<TreeInternalData>();
+            List<TreeInternalData> trees = new List<TreeInternalData>();
 
             foreach (var line in catFileNiceResult)
             {
                 string[] lineMeta = line.BaseObject.ToString().Split(' ');
+                string[] shaName = lineMeta[2].Split('\t');
+
+                TreeInternalData data = new TreeInternalData()
+                {
+                    ModeCode = lineMeta[0],
+                    SHA = shaName[0],
+                    FileName = shaName[1]
+                };
 
                 // Trees are a collection of trees and blobs
                 switch (lineMeta[1])
                 {
                     case "blob":
-                        BlobData data = new BlobData()
-                        {
-                            ModeCode = lineMeta[0],
-                            SHA = lineMeta[2]
-                        };
+                        blobs.Add(data);
                         break;
                     case "tree":
+                        trees.Add(data);
                         break;
                     default:
                         break;
-                }
-
-                for (var i = 0; i < 3; i++)
-                {
-                    metadataMatrix[index, i] = lineMeta[i];
                 }
 
                 index++;
@@ -179,6 +181,8 @@ namespace GitSpect.Cmd
 
             GitObject newTree = new Tree()
             {
+                Blobs = blobs,
+                Trees = trees
             };
 
             return newTree;

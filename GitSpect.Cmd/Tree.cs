@@ -1,6 +1,10 @@
-﻿namespace GitSpect.Cmd
+﻿using System.Collections.Generic;
+
+namespace GitSpect.Cmd
 {
     internal class Tree : GitObject
     {
+        public List<TreeInternalData> Blobs { get; internal set; }
+        public List<TreeInternalData> Trees { get; internal set; }
     }
 }
