@@ -130,9 +130,15 @@ namespace GitSpect.Cmd
             {
                 string[] lineMeta = line.BaseObject.ToString().Split(' ');
 
+                // Trees are a collection of trees and blobs
                 switch (lineMeta[1])
                 {
                     case "blob":
+                        BlobData data = new BlobData()
+                        {
+                            ModeCode = lineMeta[0],
+                            SHA = lineMeta[2]
+                        };
                         break;
                     case "tree":
                         break;

@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blob.cs" />
+    <Compile Include="BlobData.cs" />
     <Compile Include="Commit.cs" />
     <Compile Include="GitObject.cs" />
     <Compile Include="Program.cs" />
