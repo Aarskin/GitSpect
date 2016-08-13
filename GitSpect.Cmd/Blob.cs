@@ -10,10 +10,13 @@ namespace GitSpect.Cmd
 {
     class Blob : GitObject
     {
-        internal static void WriteRawBlobToDisk(PSObject[] catFileNiceResult)
+        internal static void WriteRawBlobToDisk(string sha, PSObject[] catFileNiceResult)
         {
+            string folder = sha.Substring(0, 2);
+            string name = sha.Substring(2) + "_raw.txt";
+            string path = Path.Combine(Program.OBJECT_BASE, folder, name);
             string[] lines = catFileNiceResult.Select(x => x.ToString()).ToArray();
-            string path = string.Format(@"{0}\{1}");
+
             File.AppendAllLines(path, lines);
         }
     }
