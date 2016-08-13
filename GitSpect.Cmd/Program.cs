@@ -117,7 +117,7 @@ namespace GitSpect.Cmd
 
         private static GitObject CreateNewBlob(PSObject[] catFileNiceResult)
         {
-            throw new NotImplementedException();
+            return new Blob();
         }
 
         private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
