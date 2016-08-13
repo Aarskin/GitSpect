@@ -13,7 +13,7 @@ namespace GitSpect.Console
         {
             using (PowerShell posh = PowerShell.Create())
             {
-                posh.AddScript(@"cd C:\Users\mwiem\OneDrive\Projects\GitSpect.Console\.git\objects; ls");
+                posh.AddScript(@"cd C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects; ls");
 
                 var results = posh.Invoke();
 
