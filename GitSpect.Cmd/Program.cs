@@ -97,7 +97,11 @@ namespace GitSpect.Cmd
                     newObject = CreateNewTree(catFileNiceResult);
                     break;
                 case "blob":
-                    newObject = CreateNewBlob(catFileNiceResult);
+                    Blob.WriteRawBlobToDisk(catFileNiceResult);
+                    newObject = new Blob()
+                    {
+                        SHA = fullName
+                    };
                     break;
                 default:
                     newObject = new Blob
@@ -110,14 +114,9 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
-        private static GitObject CreateNewBlob(PSObject[] catFileNiceResult)
-        {
-            throw new NotImplementedException();
-        }
-
         private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
         {
-            throw new NotImplementedException();
+            return new Blob();
         }
 
         /// <summary>
