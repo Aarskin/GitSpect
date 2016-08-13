@@ -49,22 +49,79 @@ namespace GitSpect.Cmd
             // Filter out pack and info
             if(firstTwoLetters.ToString().Length == 2)
             {
-                string command = string.Format(@"cd {0}\{1}; ls", OBJECT_BASE, firstTwoLetters);
-                var restOfLettersSet = ExecuteCommand(command);
+                string lsNameCommand = string.Format(@"cd {0}\{1}; ls", OBJECT_BASE, firstTwoLetters);
+                var restOfLettersSet = ExecuteCommand(lsNameCommand);
                 
                 foreach (var theRestOfTheLetters in restOfLettersSet)
                 {
                     string fullName = firstTwoLetters.ToString() + theRestOfTheLetters.ToString();
-                    GitObject newObject = new Blob()
-                    {
-                        SHA = fullName
-                    };
+
+                    // Run all the relevant commands on each object
+                    string catFileNiceCommand = string.Format(@"git cat-file {0} -p", fullName);
+                    var catFileNiceResult = ExecuteCommand(catFileNiceCommand).ToArray();
+                    string catFileTypeCommand = string.Format(@"git cat-file {0} -t", fullName);
+                    var catFileTypeResult = ExecuteCommand(catFileTypeCommand).ToArray();
+                    string catFileSizeCommand = string.Format(@"git cat-file {0} -s", fullName);
+                    var catFileSizeResult = ExecuteCommand(catFileSizeCommand).ToArray();
+
+                    // Parse metadata for GitObject
+                    int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
+                    string objectType = (string)catFileTypeResult[0].BaseObject;
+                    // Passing in name here feels weird
+                    GitObject newObject = CreateNewObject(catFileNiceResult, objectType);
+                    // But so does this...
+                    newObject.SHA = fullName;
+
+                    
 
                     results.Add(newObject);
                 }
             }
 
             return results;
+        }
+
+        private static GitObject CreateNewObject(PSObject[] catFileNiceResult, string objectType)
+        {
+            GitObject newObject;
+
+            switch (objectType)
+            {
+                case "commit":
+                    newObject = new Commit()
+                    {
+                        Tree = (string)catFileNiceResult[0].BaseObject,
+                        Parent = (string)catFileNiceResult[1].BaseObject,
+                        Author = (string)catFileNiceResult[2].BaseObject,
+                        Committer = (string)catFileNiceResult[3].BaseObject,
+                        Message = (string)catFileNiceResult[5].BaseObject,
+                    };
+                    break;
+                case "tree":
+                    newObject = CreateNewTree(catFileNiceResult);
+                    break;
+                case "blob":
+                    newObject = CreateNewBlob(catFileNiceResult);
+                    break;
+                default:
+                    newObject = new Blob
+                    {
+
+                    };
+                    break;
+            }
+
+            return newObject;
+        }
+
+        private static GitObject CreateNewBlob(PSObject[] catFileNiceResult)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
