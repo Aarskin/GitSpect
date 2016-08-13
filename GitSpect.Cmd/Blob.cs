@@ -10,6 +10,11 @@ namespace GitSpect.Cmd
 {
     class Blob : GitObject
     {
+        public Blob()
+        {
+            Type = GitObjects.Blob;
+        }
+
         internal static void WriteRawBlobToDisk(string sha, PSObject[] catFileNiceResult)
         {
             string folder = sha.Substring(0, 2);

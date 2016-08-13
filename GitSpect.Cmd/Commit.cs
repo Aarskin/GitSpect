@@ -2,6 +2,11 @@
 {
     internal class Commit : GitObject
     {
+        public Commit()
+        {
+            Type = GitObjects.Commit;
+        }
+
         public string Author { get; internal set; }
         public string Committer { get; internal set; }
         public string Message { get; internal set; }
