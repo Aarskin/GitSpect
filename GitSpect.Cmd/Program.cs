@@ -108,7 +108,7 @@ namespace GitSpect.Cmd
             switch (objectType)
             {
                 case "commit":
-                    newObject = CreateNewCommit();
+                    newObject = CreateNewCommit(fullName, catFileNiceResult);
                     break;
                 case "tree":
                     newObject = CreateNewTree(fullName, catFileNiceResult);
@@ -134,21 +134,33 @@ namespace GitSpect.Cmd
         private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit)
         {
             Commit retVal;
+            bool rootCommit = rawCommit[1].BaseObject.ToString().StartsWith("author");
 
-            switch(rawCommit.Length)
+            if(rootCommit)
             {
-                case 
+                retVal = new Commit()
+                {
+                    SHA = sha,
+                    Tree = (string)rawCommit[0].BaseObject,
+                    Parent = null,
+                    Author = (string)rawCommit[1].BaseObject,
+                    Committer = (string)rawCommit[2].BaseObject,
+                    Message = (string)rawCommit[4].BaseObject,
+                };
+            }
+            else
+            {
+                retVal = new Commit()
+                {
+                    SHA = sha,
+                    Tree = (string)rawCommit[0].BaseObject,
+                    Parent = (string)rawCommit[1].BaseObject,
+                    Author = (string)rawCommit[2].BaseObject,
+                    Committer = (string)rawCommit[3].BaseObject,
+                    Message = (string)rawCommit[5].BaseObject,
+                };
             }
 
-            retVal = new Commit()
-            {
-                SHA = sha,
-                Tree = (string)rawCommit[0].BaseObject,
-                Parent = (string)rawCommit[1].BaseObject,
-                Author = (string)rawCommit[2].BaseObject,
-                Committer = (string)rawCommit[3].BaseObject,
-                Message = (string)rawCommit[5].BaseObject,
-            };
 
             return retVal;
         }
