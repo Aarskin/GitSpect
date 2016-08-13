@@ -85,6 +85,7 @@ namespace GitSpect.Cmd
         {
             GitObject newObject;
 
+            // Yeah this could be an enum, but this is the ugly parsing code
             switch (objectType)
             {
                 case "commit":
@@ -121,7 +122,37 @@ namespace GitSpect.Cmd
 
         private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
         {
-            throw new NotImplementedException();
+            int index = 0;
+            int numLines = catFileNiceResult.Length;
+            string[,] metadataMatrix = new string[numLines,3];
+
+            foreach (var line in catFileNiceResult)
+            {
+                string[] lineMeta = line.BaseObject.ToString().Split(' ');
+
+                switch (lineMeta[1])
+                {
+                    case "blob":
+                        break;
+                    case "tree":
+                        break;
+                    default:
+                        break;
+                }
+
+                for (var i = 0; i < 3; i++)
+                {
+                    metadataMatrix[index, i] = lineMeta[i];
+                }
+
+                index++;
+            }               
+
+            GitObject newTree = new Tree()
+            {
+            };
+
+            return newTree;
         }
 
         /// <summary>
