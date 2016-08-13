@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -11,29 +12,49 @@ namespace GitSpect.Cmd
     {
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private static Dictionary<string, GitObject> _graphDictionary;
+        private static IEnumerable<PSObject> gitObjectHints;
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("Hey there, gimme a sec to load up your objects!");
             _graphDictionary = new Dictionary<string, GitObject>();
-            IEnumerable<PSObject> gitObjectHeaders;
+            IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
             string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
-            gitObjectHeaders = ExecuteCommand(command);
+            gitObjectHints = ExecuteCommand(command);
 
-            foreach (var obj in gitObjectHeaders)
+            Stopwatch allObjsTimer = new Stopwatch();
+            allObjsTimer.Start();
+
+            foreach (var hint in gitObjectHints)
             {
-                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(obj);
+                bool first = true;
+                Stopwatch objTimer = new Stopwatch();
+                objTimer.Start();
+                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(hint);
+                objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)
                 {
+                    if (!first) Console.WriteLine();
+
                     _graphDictionary.Add(gitObj.SHA, gitObj);
-                    Console.WriteLine(gitObj.SHA);
+
+                    Console.Write(gitObj.SHA + " | ");
+                    first = false;
                 }
+
+                string stats = string.Format("Hint {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                Console.Write(stats);
+                Console.WriteLine();
             }
 
-            Console.WriteLine("Press any key to close this window");
+            allObjsTimer.Stop();
+
+            int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
+            Console.WriteLine("Objects loaded in {0} seconds", elapsedSeconds);
             Console.ReadKey();
         }
 
@@ -83,6 +104,7 @@ namespace GitSpect.Cmd
         {
             GitObject newObject;
 
+            // Yeah this could be an enum, but this is the ugly parsing code
             switch (objectType)
             {
                 case "commit":
@@ -117,9 +139,50 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
+            
         private static GitObject CreateNewTree(PSObject[] catFileNiceResult)
         {
-            return new Blob();
+            int index = 0;
+            int numLines = catFileNiceResult.Length;
+            //string[,] metadataMatrix = new string[numLines,3];
+            List<TreeInternalData> blobs = new List<TreeInternalData>();
+            List<TreeInternalData> trees = new List<TreeInternalData>();
+
+            foreach (var line in catFileNiceResult)
+            {
+                string[] lineMeta = line.BaseObject.ToString().Split(' ');
+                string[] shaName = lineMeta[2].Split('\t');
+
+                TreeInternalData data = new TreeInternalData()
+                {
+                    ModeCode = lineMeta[0],
+                    SHA = shaName[0],
+                    FileName = shaName[1]
+                };
+
+                // Trees are a collection of trees and blobs
+                switch (lineMeta[1])
+                {
+                    case "blob":
+                        blobs.Add(data);
+                        break;
+                    case "tree":
+                        trees.Add(data);
+                        break;
+                    default:
+                        break;
+                }
+
+                index++;
+            }               
+
+            GitObject newTree = new Tree()
+            {
+                Blobs = blobs,
+                Trees = trees
+            };
+
+            return newTree;
         }
 
         /// <summary>

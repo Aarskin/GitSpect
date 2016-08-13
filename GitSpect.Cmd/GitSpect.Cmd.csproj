@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Blob.cs" />
     <Compile Include="Commit.cs" />
+    <Compile Include="TreeInternalData.cs" />
     <Compile Include="GitObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
