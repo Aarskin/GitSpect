@@ -24,34 +24,47 @@ namespace GitSpect.Cmd
 
             foreach (var obj in gitObjectHeaders)
             {
-                ProcessPSObject(obj);
-                Console.WriteLine(obj);
+                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(obj);
+
+                foreach (var gitObj in gitObjs)
+                {
+                    _graphDictionary.Add(gitObj.SHA, gitObj);
+                    Console.WriteLine(gitObj.SHA);
+                }
             }
 
             Console.WriteLine("Press any key to close this window");
             Console.ReadKey();
         }
 
-        private static GitObject ProcessPSObject(PSObject firstTwoLetters)
+        /// <summary>
+        /// Turns a /a5/ style directory name into the list of gitobjects contained within
+        /// </summary>
+        /// <param name="firstTwoLetters">A directory containing one or more git objects</param>
+        /// <returns>an enumeration of the objects in the directory, empty list if no results</returns>
+        public static IList<GitObject> ProcessPSObjectIntoGitObjects(PSObject firstTwoLetters)
         {
+            IList<GitObject> results = new List<GitObject>();
+
             // Filter out pack and info
             if(firstTwoLetters.ToString().Length == 2)
             {
-                List<string> fullGitObjectNames = new List<string>();
-                IEnumerable<PSObject> results;
-                string command = string.Format(@"cd {0}; ls", firstTwoLetters);
-                results = ExecuteCommand(command);
+                string command = string.Format(@"cd {0}\{1}; ls", OBJECT_BASE, firstTwoLetters);
+                var restOfLettersSet = ExecuteCommand(command);
                 
-                foreach (var result in results)
+                foreach (var theRestOfTheLetters in restOfLettersSet)
                 {
-                    string fullName = firstTwoLetters.ToString() + result.ToString();
-                    fullGitObjectNames.Add(fullName);
+                    string fullName = firstTwoLetters.ToString() + theRestOfTheLetters.ToString();
+                    GitObject newObject = new Blob()
+                    {
+                        SHA = fullName
+                    };
+
+                    results.Add(newObject);
                 }
             }
 
-            GitObject newObject = new Blob();
-
-            return newObject;
+            return results;
         }
 
         /// <summary>
