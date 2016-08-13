@@ -14,6 +14,7 @@ namespace GitSpect.Cmd
 
         static void Main(string[] args)
         {
+            Console.WriteLine("Hey there, gimme a sec to load up your objects!");
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHeaders;
 
