@@ -50,9 +50,12 @@ namespace GitSpect.Cmd
             if(firstTwoLetters.ToString().Length == 2)
             {
                 string lsNameCommand = string.Format(@"cd {0}\{1}; ls", OBJECT_BASE, firstTwoLetters);
-                var restOfLettersSet = ExecuteCommand(lsNameCommand);
+                var directoryContents = ExecuteCommand(lsNameCommand);
+                // Filter out existing raw txt files (probably need to get more sophisticated here)
+                IEnumerable<string> gitObjects = directoryContents
+                    .Select(x => x.ToString()).Where(x => !(x.ToString().EndsWith(".txt")));
                 
-                foreach (var theRestOfTheLetters in restOfLettersSet)
+                foreach (var theRestOfTheLetters in gitObjects)
                 {
                     string fullName = firstTwoLetters.ToString() + theRestOfTheLetters.ToString();
 
