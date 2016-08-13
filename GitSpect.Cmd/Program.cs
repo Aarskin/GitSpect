@@ -5,25 +5,38 @@ using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GitSpect.Console
+namespace GitSpect.Cmd
 {
     class Program
     {
+        private const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
+        private static Dictionary<string, GitObject> _graphDictionary;
+
         static void Main(string[] args)
         {
+            _graphDictionary = new Dictionary<string, GitObject>();
+
             using (PowerShell posh = PowerShell.Create())
             {
-                posh.AddScript(@"cd C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects; ls");
+                string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
+                posh.AddScript(command);
 
                 var results = posh.Invoke();
 
                 foreach (var result in results)
                 {
-                    System.Console.WriteLine(result);
+                    ProcessGitObject(result);
+                    Console.WriteLine(result);
                 }
             }
 
-            System.Console.ReadKey();
+            Console.WriteLine("Press any key to close this window");
+            Console.ReadKey();
+        }
+
+        private static void ProcessGitObject(PSObject firstTwoLetters)
+        {
+            
         }
     }
 }
