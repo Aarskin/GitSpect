@@ -42,7 +42,24 @@ namespace GitSpect.Cmd
 
                     _graphDictionary.Add(gitObj.SHA, gitObj);
 
-                    Console.Write(gitObj.SHA + " | ");
+                    // Report to the console
+                    string type;
+                    switch(gitObj.Type)
+                    {
+                        case GitObjects.Blob:
+                            type = " b ";
+                            break;
+                        case GitObjects.Tree:
+                            type = " t ";
+                            break;
+                        case GitObjects.Commit:
+                            type = " c ";
+                            break;
+                        default:
+                            type = " | ";
+                            break;
+                    }
+                    Console.Write(gitObj.SHA + type);
                     first = false;
                 }
 
