@@ -2,5 +2,6 @@
 {
     abstract class GitObject
     {
+        public string SHA;
     }
 }
