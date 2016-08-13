@@ -1,6 +1,6 @@
 ﻿namespace GitSpect.Cmd
 {
-    abstract class GitObject
+    public abstract class GitObject
     {
         public string SHA;
     }

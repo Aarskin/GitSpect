@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace GitSpect.Cmd
 {
-    class Program
+    public class Program
     {
-        private const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
+        public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private static Dictionary<string, GitObject> _graphDictionary;
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHeaders;
