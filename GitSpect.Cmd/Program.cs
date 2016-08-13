@@ -67,12 +67,7 @@ namespace GitSpect.Cmd
                     // Parse metadata for GitObject
                     int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
                     string objectType = (string)catFileTypeResult[0].BaseObject;
-                    // Passing in name here feels weird
-                    GitObject newObject = CreateNewObject(catFileNiceResult, objectType);
-                    // But so does this...
-                    newObject.SHA = fullName;
-
-                    
+                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType);                   
 
                     results.Add(newObject);
                 }
@@ -81,7 +76,7 @@ namespace GitSpect.Cmd
             return results;
         }
 
-        private static GitObject CreateNewObject(PSObject[] catFileNiceResult, string objectType)
+        private static GitObject CreateNewObject(string fullName, PSObject[] catFileNiceResult, string objectType)
         {
             GitObject newObject;
 
@@ -90,6 +85,7 @@ namespace GitSpect.Cmd
                 case "commit":
                     newObject = new Commit()
                     {
+                        SHA = fullName,
                         Tree = (string)catFileNiceResult[0].BaseObject,
                         Parent = (string)catFileNiceResult[1].BaseObject,
                         Author = (string)catFileNiceResult[2].BaseObject,
