@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -22,18 +23,36 @@ namespace GitSpect.Cmd
             string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
             gitObjectHeaders = ExecuteCommand(command);
 
-            foreach (var obj in gitObjectHeaders)
+            Stopwatch allObjsTimer = new Stopwatch();
+            allObjsTimer.Start();
+
+            foreach (var hint in gitObjectHints)
             {
-                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(obj);
+                bool first = true;
+                Stopwatch objTimer = new Stopwatch();
+                objTimer.Start();
+                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(hint);
+                objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)
                 {
+                    if (!first) Console.WriteLine();
+
                     _graphDictionary.Add(gitObj.SHA, gitObj);
-                    Console.WriteLine(gitObj.SHA);
+
+                    Console.Write(gitObj.SHA + " | ");
+                    first = false;
                 }
+
+                string stats = string.Format("Hint {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                Console.Write(stats);
+                Console.WriteLine();
             }
 
-            Console.WriteLine("Press any key to close this window");
+            allObjsTimer.Stop();
+
+            int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
+            Console.WriteLine("Objects loaded in {0} seconds", elapsedSeconds);
             Console.ReadKey();
         }
 
