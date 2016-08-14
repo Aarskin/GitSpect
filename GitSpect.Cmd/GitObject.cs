@@ -20,6 +20,7 @@ namespace GitSpect.Cmd
 
             prettyPrint.AppendLine(typeLine);
             prettyPrint.AppendLine(sizeLine);
+            prettyPrint.AppendLine(refCountLine);
             prettyPrint.AppendLine(shaLine);
 
             return prettyPrint.ToString();

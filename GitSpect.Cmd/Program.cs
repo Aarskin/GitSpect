@@ -120,7 +120,8 @@ namespace GitSpect.Cmd
 
             while (true)
             {
-                Console.Write("?> ");
+                string handle = processor.CurrentHandle;
+                Console.Write("{0}> ", handle);
                 string[] cmdArgs = null;
                 string[] command = GetCommand();
                 Commands mainCommand = Commands.Unknown;
