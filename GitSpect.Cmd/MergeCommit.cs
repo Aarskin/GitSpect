@@ -2,7 +2,7 @@
 {
     internal class MergeCommit : Commit
     {
-        public MergeCommit()
+        public MergeCommit() : base()
         {
             Type = GitObjects.MergeCommit;
         }

@@ -4,6 +4,11 @@ namespace GitSpect.Cmd
 {
     public abstract class GitObject
     {
+        public GitObject()
+        {
+            RefShas = new List<string>();
+        }
+
         public string SHA;
         public GitObjects Type;
 
