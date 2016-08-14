@@ -11,6 +11,7 @@ namespace GitSpect.Cmd
 
         public string SHA;
         public GitObjects Type;
+        public int Size;
         
         public int RefCount { get; internal set; }
         public List<string> RefShas { get; internal set; }

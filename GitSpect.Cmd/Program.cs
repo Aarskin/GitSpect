@@ -108,7 +108,7 @@ namespace GitSpect.Cmd
                     // Parse metadata for GitObject
                     int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
                     string objectType = (string)catFileTypeResult[0].BaseObject;
-                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType);                   
+                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType, sizeInBytes);                   
 
                     results.Add(newObject);
                 }
@@ -117,7 +117,7 @@ namespace GitSpect.Cmd
             return results;
         }
 
-        private static GitObject CreateNewObject(string fullName, PSObject[] catFileNiceResult, string objectType)
+        private static GitObject CreateNewObject(string fullName, PSObject[] catFileNiceResult, string objectType, int sizeInBytes)
         {
             GitObject newObject;
 
@@ -125,10 +125,10 @@ namespace GitSpect.Cmd
             switch (objectType)
             {
                 case "commit":
-                    newObject = CreateNewCommit(fullName, catFileNiceResult);
+                    newObject = CreateNewCommit(fullName, catFileNiceResult, sizeInBytes);
                     break;
                 case "tree":
-                    newObject = CreateNewTree(fullName, catFileNiceResult);
+                    newObject = CreateNewTree(fullName, catFileNiceResult, sizeInBytes);
                     break;
                 case "blob":
                     Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
@@ -148,7 +148,7 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
-        private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit)
+        private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit, int sizeInBytes)
         {
             Commit retVal;
             bool rootCommit = rawCommit[1].BaseObject.ToString().StartsWith("author");
@@ -160,6 +160,7 @@ namespace GitSpect.Cmd
                 retVal = new Commit()
                 {
                     SHA = sha,
+                    Size = sizeInBytes,
                     Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
                     Parent = null,
                     Author = rawCommit[1].BaseObject.ToString().Split(' ')[1],
@@ -172,6 +173,7 @@ namespace GitSpect.Cmd
                 retVal = new MergeCommit()
                 {
                     SHA = sha,
+                    Size = sizeInBytes,
                     Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
                     ParentA = rawCommit[1].BaseObject.ToString().Split(' ')[1],
                     ParentB = rawCommit[2].BaseObject.ToString().Split(' ')[1],
@@ -185,6 +187,7 @@ namespace GitSpect.Cmd
                 retVal = new Commit()
                 {
                     SHA = sha,
+                    Size = sizeInBytes,
                     Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
                     Parent = rawCommit[1].BaseObject.ToString().Split(' ')[1],
                     Author = rawCommit[2].BaseObject.ToString().Split(' ')[1],
@@ -196,7 +199,7 @@ namespace GitSpect.Cmd
             return retVal;
         }
 
-        private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult)
+        private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult, int sizeInBytes)
         {
             int index = 0;
             int numLines = catFileNiceResult.Length;
@@ -235,6 +238,7 @@ namespace GitSpect.Cmd
             {
                 Blobs = blobs,
                 SHA = sha,
+                Size = sizeInBytes,
                 Trees = trees
             };
 
