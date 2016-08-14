@@ -128,12 +128,11 @@ namespace GitSpect.Cmd
 
                 if(command.Length > 1)
                 {
-                    int i = 0;
-                    cmdArgs = new string[command.Length - 2];
+                    cmdArgs = new string[command.Length - 1];
 
-                    foreach (var arg in command)
+                    for(int i = 1; i < command.Length; i++)
                     {
-                        cmdArgs[i++] = arg;
+                        cmdArgs[i-1] = command[i];
                     }
                 }
 
