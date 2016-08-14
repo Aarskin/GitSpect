@@ -10,6 +10,15 @@ namespace GitSpect.Cmd
     {
         private Dictionary<string, GitObject> _objectGraph;
         private Random _rng;
+        private GitObject _currentObjectHandle;
+
+        public string CurrentHandle { get
+            {
+                string handle = _currentObjectHandle != null ? 
+                    _currentObjectHandle.SHA.Substring(0, 5) : "NULL";
+                return handle;
+            }
+        }
 
         public CommandProcessor(Dictionary<string, GitObject> graphToSearch)
         {
@@ -51,6 +60,8 @@ namespace GitSpect.Cmd
                     Console.WriteLine("Unknown command: '{0}'", command);
                     break;
             }
+
+            _currentObjectHandle = retVal == null ? _currentObjectHandle : retVal;
 
             return retVal;
         }
