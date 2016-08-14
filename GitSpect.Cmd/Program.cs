@@ -16,7 +16,7 @@ namespace GitSpect.Cmd
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hey there, gimme a sec to load up your objects!");
+            Console.WriteLine("Hey there, gimme a minute to load your object graph...");
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
 
@@ -30,7 +30,7 @@ namespace GitSpect.Cmd
 
             foreach (var hint in gitObjectHints)
             {
-                bool first = true;
+                bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
                 IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(hint);
@@ -38,40 +38,52 @@ namespace GitSpect.Cmd
 
                 foreach (var gitObj in gitObjs)
                 {
-                    if (!first) Console.WriteLine();
+                    if (!firstObjInDirectory) Console.WriteLine();
 
                     _graphDictionary.CacheGitObject(gitObj);
 
                     // Report to the console
+                    string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
                     string type;
-                    switch(gitObj.Type)
+                    switch (gitObj.Type)
                     {
                         case GitObjects.Blob:
-                            type = " b ";
+                            type = " B ";
                             break;
                         case GitObjects.Tree:
-                            type = " t ";
+                            type = " T ";
                             break;
                         case GitObjects.Commit:
-                            type = " c ";
+                            type = " C ";
+                            break;
+                        case GitObjects.MergeCommit:
+                            type = " M ";
                             break;
                         default:
                             type = " | ";
                             break;
                     }
-                    Console.Write(gitObj.SHA + type);
-                    first = false;
+
+                    string report = string.Format(reportTemplate, gitObj.SHA.Substring(0, 5),
+                                                    gitObj.Size.ToString("D4"), type);
+
+                    Console.Write(report);
+                    firstObjInDirectory = false;
                 }
 
-                string stats = string.Format("Hint {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                string stats = string.Format("Directory {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
                 Console.Write(stats);
                 Console.WriteLine();
             }
 
             allObjsTimer.Stop();
 
+            int elapsedHours = allObjsTimer.Elapsed.Hours;
+            int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
             int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
-            Console.WriteLine("Objects loaded in {0} seconds", elapsedSeconds);
+            int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
+            Console.WriteLine("--- Objects loaded --- {0}:{1}:{2}.{3}",
+                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds);
             Console.ReadKey();
         }
 
