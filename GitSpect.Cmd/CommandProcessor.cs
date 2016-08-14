@@ -53,6 +53,17 @@ namespace GitSpect.Cmd
             return retVal;
         }
 
+        private GitObject FindRandomObject(GitObjects objType)
+        {
+            GitObject randomObject;
+
+            List<GitObject> listOfType = _objectGraph.Select(x => x.Value).Where(x => x.Type == objType).ToList();
+            int randomIndex = new Random().Next(listOfType.Count-1);
+            randomObject = listOfType[randomIndex];
+
+            return randomObject;
+        }
+
         private GitObject FindMostConnectedObject()
         {
             GitObject mostConnected = null;
