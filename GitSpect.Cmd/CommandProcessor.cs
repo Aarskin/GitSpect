@@ -9,10 +9,12 @@ namespace GitSpect.Cmd
     class CommandProcessor
     {
         private Dictionary<string, GitObject> _objectGraph;
+        private Random _rng;
 
         public CommandProcessor(Dictionary<string, GitObject> graphToSearch)
         {
             _objectGraph = graphToSearch;
+            _rng = new Random();
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace GitSpect.Cmd
 
             List<GitObject> listOfType = _objectGraph.Select(x => x.Value).Where(x => x.Type == objType).ToList();
             int maxIndex = listOfType.Count > 0 ? listOfType.Count - 1 : 0;
-            int randomIndex = new Random().Next(0);
+            int randomIndex = _rng.Next(0, maxIndex);
 
             // yeah, we lose one here, but whatever
             randomObject = maxIndex > 0 ? listOfType[randomIndex] : null;
