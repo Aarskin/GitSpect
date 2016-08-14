@@ -14,16 +14,22 @@ namespace GitSpect.Cmd
     {
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         public const string REPO_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd";
+        public const string ONE_LINE_TO_RULE_THEM_ALL = "-----------------------------------------------------------------";
         private static Dictionary<string, GitObject> _graphDictionary;
 
         public static void Main(string[] args)
         {
             // Toggles
             bool quickDebug = Convert.ToBoolean(args[0]);
-            
+
             #region Object Graph Loading
-            
-            Console.WriteLine("Hey there, gimme a minute to load your object graph...");
+
+            string quickDebugStatus = quickDebug ? "On" : "Off";
+            string welcomeHeader = string.Format("GitSpect v0.0.1 | QuickDebug {0}" , quickDebugStatus);
+
+            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
+            Console.WriteLine(welcomeHeader);
+            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
 
@@ -35,6 +41,7 @@ namespace GitSpect.Cmd
 
             Stopwatch allObjsTimer = new Stopwatch();
             int totalSizeOfAllGraphObjects = 0;
+            int totalNumberOfGraphObjects = 0;
             allObjsTimer.Start();
 
             foreach (var hint in gitObjectHints)
@@ -53,6 +60,7 @@ namespace GitSpect.Cmd
 
                     // Track stats
                     totalSizeOfAllGraphObjects += gitObj.Size;
+                    totalNumberOfGraphObjects++;
 
                     // Report to the console
                     string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
@@ -94,9 +102,11 @@ namespace GitSpect.Cmd
             int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
             int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
             int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
-            string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Total object graph size: {4}",
-                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects);
+            string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Bytes: {4}, # Objs: {5}",
+                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects, totalNumberOfGraphObjects);
+            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(overallReport);
+            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
 
             var reportingPath = Path.Combine(REPO_BASE, "SizeLog.txt");
             var writer = File.AppendText(reportingPath);
@@ -110,6 +120,7 @@ namespace GitSpect.Cmd
 
             while (true)
             {
+                Console.Write("?> ");
                 Commands command = GetCommand();
                 var result = processor.Process(command);
                 string report = (result == null) ? "No Object Found" : result.ToString();
