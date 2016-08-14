@@ -12,11 +12,13 @@ namespace GitSpect.Cmd
     public class Program
     {
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
+        public const string REPO_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd";
         private static Dictionary<string, GitObject> _graphDictionary;
         private static IEnumerable<PSObject> gitObjectHints;
 
         public static void Main(string[] args)
         {
+            #region Object Graph Loading
             Console.WriteLine("Hey there, gimme a minute to load your object graph...");
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
@@ -90,9 +92,16 @@ namespace GitSpect.Cmd
             string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Total object graph size: {4}",
                 elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects);
             Console.WriteLine(overallReport);
-            File.AppendText(overallReport);
-            
-            while(true)
+
+            var reportingPath = Path.Combine(REPO_BASE, "SizeLog.txt");
+            var writer = File.AppendText(reportingPath);
+            writer.Write(DateTime.Now.ToString() + " " + overallReport);
+            writer.Flush();
+            writer.Close();
+#endregion
+
+            // Finally, the actual command loop
+            while (true)
             {
                 string command = GetCommand();
 
