@@ -40,7 +40,7 @@ namespace GitSpect.Cmd
                 {
                     if (!first) Console.WriteLine();
 
-                    _graphDictionary.Add(gitObj.SHA, gitObj);
+                    _graphDictionary.CacheGitObject(gitObj);
 
                     // Report to the console
                     string type;
