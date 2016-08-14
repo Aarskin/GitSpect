@@ -22,7 +22,7 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string poshCommand = string.Format(@"cd {0}; ls", OBJECT_BASE);
+            string poshCommand = string.Format(@"cd {0}; {1}", OBJECT_BASE, PowerShellCommands.GET_LAST_15_MINUTES);
             gitObjectHints = ExecuteCommand(poshCommand);
 
             Stopwatch allObjsTimer = new Stopwatch();
