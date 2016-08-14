@@ -16,21 +16,21 @@ namespace GitSpect.Cmd
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hey there, gimme a sec to load up your objects!");
+            Console.WriteLine("Hey there, gimme a minute to load your object graph...");
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
-            gitObjectHints = ExecuteCommand(command);
+            string poshCommand = string.Format(@"cd {0}; ls", OBJECT_BASE);
+            gitObjectHints = ExecuteCommand(poshCommand);
 
             Stopwatch allObjsTimer = new Stopwatch();
             allObjsTimer.Start();
 
             foreach (var hint in gitObjectHints)
             {
-                bool first = true;
+                bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
                 IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(hint);
@@ -38,41 +38,69 @@ namespace GitSpect.Cmd
 
                 foreach (var gitObj in gitObjs)
                 {
-                    if (!first) Console.WriteLine();
+                    if (!firstObjInDirectory) Console.WriteLine();
 
-                    _graphDictionary.Add(gitObj.SHA, gitObj);
+                    _graphDictionary.CacheGitObject(gitObj);
 
                     // Report to the console
+                    string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
                     string type;
-                    switch(gitObj.Type)
+                    switch (gitObj.Type)
                     {
                         case GitObjects.Blob:
-                            type = " b ";
+                            type = " B ";
                             break;
                         case GitObjects.Tree:
-                            type = " t ";
+                            type = " T ";
                             break;
                         case GitObjects.Commit:
-                            type = " c ";
+                            type = " C ";
+                            break;
+                        case GitObjects.MergeCommit:
+                            type = " M ";
                             break;
                         default:
                             type = " | ";
                             break;
                     }
-                    Console.Write(gitObj.SHA + type);
-                    first = false;
+
+                    string report = string.Format(reportTemplate, gitObj.SHA.Substring(0, 5),
+                                                    gitObj.Size.ToString("D4"), type);
+
+                    Console.Write(report);
+                    firstObjInDirectory = false;
                 }
 
-                string stats = string.Format("Hint {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                string stats = string.Format("Directory {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
                 Console.Write(stats);
                 Console.WriteLine();
             }
 
             allObjsTimer.Stop();
 
+            int elapsedHours = allObjsTimer.Elapsed.Hours;
+            int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
             int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
-            Console.WriteLine("Objects loaded in {0} seconds", elapsedSeconds);
-            Console.ReadKey();
+            int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
+            Console.WriteLine("--- Objects loaded --- {0}:{1}:{2}.{3}",
+                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds);
+            
+            while(true)
+            {
+                string command = GetCommand();
+
+                switch (command)
+                {
+                    default:
+                        Console.WriteLine("Unknown command: '{0}'", command);
+                        break;
+                }
+            }
+        }
+
+        private static string GetCommand()
+        {
+            return Console.ReadLine();
         }
 
         /// <summary>
@@ -108,7 +136,7 @@ namespace GitSpect.Cmd
                     // Parse metadata for GitObject
                     int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
                     string objectType = (string)catFileTypeResult[0].BaseObject;
-                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType);                   
+                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType, sizeInBytes);                   
 
                     results.Add(newObject);
                 }
@@ -117,7 +145,7 @@ namespace GitSpect.Cmd
             return results;
         }
 
-        private static GitObject CreateNewObject(string fullName, PSObject[] catFileNiceResult, string objectType)
+        private static GitObject CreateNewObject(string fullName, PSObject[] catFileNiceResult, string objectType, int sizeInBytes)
         {
             GitObject newObject;
 
@@ -125,10 +153,10 @@ namespace GitSpect.Cmd
             switch (objectType)
             {
                 case "commit":
-                    newObject = CreateNewCommit(fullName, catFileNiceResult);
+                    newObject = CreateNewCommit(fullName, catFileNiceResult, sizeInBytes);
                     break;
                 case "tree":
-                    newObject = CreateNewTree(fullName, catFileNiceResult);
+                    newObject = CreateNewTree(fullName, catFileNiceResult, sizeInBytes);
                     break;
                 case "blob":
                     newObject = CreateNewBlob(fullName, catFileNiceResult);
@@ -158,21 +186,38 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
-        private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit)
+        private static GitObject CreateNewCommit(string sha, PSObject[] rawCommit, int sizeInBytes)
         {
             Commit retVal;
             bool rootCommit = rawCommit[1].BaseObject.ToString().StartsWith("author");
+            bool mergeCommit = rawCommit[1].BaseObject.ToString().StartsWith("parent")
+                && rawCommit[2].BaseObject.ToString().StartsWith("parent");
 
-            if(rootCommit)
+            if (rootCommit)
             {
                 retVal = new Commit()
                 {
                     SHA = sha,
-                    Tree = (string)rawCommit[0].BaseObject,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
                     Parent = null,
-                    Author = (string)rawCommit[1].BaseObject,
-                    Committer = (string)rawCommit[2].BaseObject,
-                    Message = (string)rawCommit[4].BaseObject,
+                    Author = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                };
+            }
+            else if(mergeCommit)
+            {
+                retVal = new MergeCommit()
+                {
+                    SHA = sha,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    ParentA = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    ParentB = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[6].BaseObject.ToString().Split(' ')[1]
                 };
             }
             else
@@ -180,19 +225,19 @@ namespace GitSpect.Cmd
                 retVal = new Commit()
                 {
                     SHA = sha,
-                    Tree = (string)rawCommit[0].BaseObject,
-                    Parent = (string)rawCommit[1].BaseObject,
-                    Author = (string)rawCommit[2].BaseObject,
-                    Committer = (string)rawCommit[3].BaseObject,
-                    Message = (string)rawCommit[5].BaseObject,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    Parent = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[5].BaseObject.ToString().Split(' ')[1]
                 };
             }
-
 
             return retVal;
         }
 
-        private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult)
+        private static GitObject CreateNewTree(string sha, PSObject[] catFileNiceResult, int sizeInBytes)
         {
             int index = 0;
             int numLines = catFileNiceResult.Length;
@@ -231,6 +276,7 @@ namespace GitSpect.Cmd
             {
                 Blobs = blobs,
                 SHA = sha,
+                Size = sizeInBytes,
                 Trees = trees
             };
 

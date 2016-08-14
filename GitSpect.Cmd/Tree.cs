@@ -4,7 +4,7 @@ namespace GitSpect.Cmd
 {
     internal class Tree : GitObject
     {
-        public Tree()
+        public Tree() : base()
         {
             Type = GitObjects.Tree;
         }

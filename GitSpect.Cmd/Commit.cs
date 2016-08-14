@@ -2,7 +2,7 @@
 {
     internal class Commit : GitObject
     {
-        public Commit()
+        public Commit() : base()
         {
             Type = GitObjects.Commit;
         }
