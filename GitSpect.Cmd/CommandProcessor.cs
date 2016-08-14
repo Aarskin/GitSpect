@@ -26,7 +26,7 @@ namespace GitSpect.Cmd
             string typeWord = "Unknown";
 
             // Assumptions that should be formalized somewhere
-            if (!string.IsNullOrEmpty(args[0]))
+            if (args != null && !string.IsNullOrEmpty(args[0]))
             {
                 typeWord = args[0];
             }
