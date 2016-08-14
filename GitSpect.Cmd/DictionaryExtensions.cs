@@ -13,6 +13,11 @@ namespace GitSpect.Cmd
             me.Add(sha, gitObj);
 
             var touchedObjects = FindNewConnections(gitObj);
+
+            foreach (var obj in touchedObjects)
+            {
+                me[obj].UpdateReferences(gitObj);
+            }
         }
 
         private static List<string> FindNewConnections(GitObject gitObj)
