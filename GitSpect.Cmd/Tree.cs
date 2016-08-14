@@ -9,6 +9,15 @@ namespace GitSpect.Cmd
             Type = GitObjects.Tree;
         }
 
+        public override string ToString()
+        {
+            string prettyPrint;
+
+
+
+            return prettyPrint;
+        }
+
         public List<TreeInternalData> Blobs { get; internal set; }
         public List<TreeInternalData> Trees { get; internal set; }
     }

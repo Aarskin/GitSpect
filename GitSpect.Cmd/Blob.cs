@@ -28,5 +28,14 @@ namespace GitSpect.Cmd
                 File.AppendAllLines(path, lines);
             }
         }
+
+        public override string ToString()
+        {
+            string prettyPrint;
+
+
+
+            return prettyPrint;
+        }
     }
 }
