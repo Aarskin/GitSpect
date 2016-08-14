@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -26,6 +27,7 @@ namespace GitSpect.Cmd
             gitObjectHints = ExecuteCommand(poshCommand);
 
             Stopwatch allObjsTimer = new Stopwatch();
+            int totalSizeOfAllGraphObjects = 0;
             allObjsTimer.Start();
 
             foreach (var hint in gitObjectHints)
@@ -41,6 +43,9 @@ namespace GitSpect.Cmd
                     if (!firstObjInDirectory) Console.WriteLine();
 
                     _graphDictionary.CacheGitObject(gitObj);
+
+                    // Track stats
+                    totalSizeOfAllGraphObjects += gitObj.Size;
 
                     // Report to the console
                     string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
@@ -82,8 +87,10 @@ namespace GitSpect.Cmd
             int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
             int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
             int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
-            Console.WriteLine("--- Objects loaded --- {0}:{1}:{2}.{3}",
-                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds);
+            string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Total object graph size: {4}",
+                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects);
+            Console.WriteLine(overallReport);
+            File.AppendText(overallReport);
             
             while(true)
             {
