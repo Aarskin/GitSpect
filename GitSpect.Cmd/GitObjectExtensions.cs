@@ -10,7 +10,8 @@ namespace GitSpect.Cmd
     {
         public static void UpdateReferences(this GitObject me, GitObject obj)
         {
-
+            me.RefCount++;
+            me.IncomingReferences.Add(obj);
         }
     }
 }
