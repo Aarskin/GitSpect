@@ -9,5 +9,7 @@ namespace GitSpect.Cmd
     public class PowerShellCommands
     {
         public const string GET_LAST_15_MINUTES = "ls | where {$_.LastAccessTime -gt (Get-Date).AddMinutes(-35)}";
+
+        public const string GET_ALL = "ls";
     }
 }

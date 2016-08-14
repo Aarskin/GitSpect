@@ -12,17 +12,20 @@ namespace GitSpect.Cmd
     {
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private static Dictionary<string, GitObject> _graphDictionary;
-        private static IEnumerable<PSObject> gitObjectHints;
 
         public static void Main(string[] args)
         {
+            // Toggles
+            bool quickDebug = Convert.ToBoolean(args[0]);
+            
             Console.WriteLine("Hey there, gimme a minute to load your object graph...");
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string poshCommand = string.Format(@"cd {0}; {1}", OBJECT_BASE, PowerShellCommands.GET_LAST_15_MINUTES);
+            var getGitObjects = quickDebug ? PowerShellCommands.GET_LAST_15_MINUTES : PowerShellCommands.GET_ALL;
+            string poshCommand = string.Format(@"cd {0}; {1}", OBJECT_BASE, getGitObjects);
             gitObjectHints = ExecuteCommand(poshCommand);
 
             Stopwatch allObjsTimer = new Stopwatch();
