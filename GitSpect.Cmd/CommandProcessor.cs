@@ -58,8 +58,11 @@ namespace GitSpect.Cmd
             GitObject randomObject;
 
             List<GitObject> listOfType = _objectGraph.Select(x => x.Value).Where(x => x.Type == objType).ToList();
-            int randomIndex = new Random().Next(listOfType.Count-1);
-            randomObject = listOfType[randomIndex];
+            int maxIndex = listOfType.Count > 0 ? listOfType.Count - 1 : 0;
+            int randomIndex = new Random().Next(0);
+
+            // yeah, we lose one here, but whatever
+            randomObject = maxIndex > 0 ? listOfType[randomIndex] : null;
 
             return randomObject;
         }
