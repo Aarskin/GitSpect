@@ -8,26 +8,35 @@ namespace GitSpect.Cmd
 {
     public static class DictionaryExtensions
     {
-        private static Lazy<Dictionary<string, GitObject>> _stalledConnections
-            = new Lazy<Dictionary<string, GitObject>>();
+        // Maps a GitObject's SHA to a list of objects that are referencing it - Shitty mode
+        private static Lazy<List<KeyValuePair<string, GitObject>>> _stalledConnections
+            = new Lazy<List<KeyValuePair<string, GitObject>>>();
 
         public static void CacheGitObject(this Dictionary<string, GitObject> me, GitObject gitObj)
         {
-            // Put this the main datastore
+            // Account for anything touching this object
+            var referencesToMe = _stalledConnections.Value.Where(x => x.Key == gitObj.SHA).Select(x => x.Value).ToList();
+            var referencesAsShas = referencesToMe.Select(x => x.SHA).ToList();
+            gitObj.RefCount += referencesToMe.Count;
+            gitObj.RefShas.AddRange(referencesAsShas);
+            _stalledConnections.Value.RemoveAll(x => x.Key == gitObj.SHA);
+
+            // Put this in the main datastore
             me.Add(gitObj.SHA, gitObj);
+            
+            // Account for anything this object touches
+            var newTouches = FindNewConnections(gitObj);
 
-            var touchedObjects = FindNewConnections(gitObj);
-
-            foreach (var objSha in touchedObjects)
+            foreach (var objSha in newTouches)
             {
-                if (me[objSha] != null)
+                if (me.ContainsKey(objSha))
                 {
                     me[objSha].UpdateReferences(gitObj);
                 }
                 else
                 {
                     // Save this connection, and recall it when the referenced object comes in
-                    _stalledConnections.Value.Add(objSha, gitObj);
+                    _stalledConnections.Value.Add(new KeyValuePair<string, GitObject>(objSha, gitObj));
                 }
             }
         }
