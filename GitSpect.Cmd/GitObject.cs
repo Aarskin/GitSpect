@@ -14,7 +14,7 @@ namespace GitSpect.Cmd
         {
             StringBuilder prettyPrint = new StringBuilder();
             string shaLine = string.Format("Object ID (SHA): {0}", SHA);
-            string typeAndSizeLine = string.Format("Type: {0} Size: {1}", Type.ToString("D3"), Size.ToString("D3"));
+            string typeAndSizeLine = string.Format("Type: {0} Size: {1}", Type, Size.ToString("D5"));
 
             prettyPrint.AppendLine(shaLine);
             prettyPrint.AppendLine(typeAndSizeLine);

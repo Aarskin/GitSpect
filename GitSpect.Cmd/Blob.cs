@@ -10,18 +10,20 @@ namespace GitSpect.Cmd
 {
     class Blob : GitObject
     {
+        private string _rawPath;
+
         public Blob() : base()
         {
             Type = GitObjects.Blob;
         }
 
-        internal static void WriteRawBlobToDisk(string sha, PSObject[] catFileNiceResult)
+        internal void WriteRawBlobToDisk(string sha, PSObject[] catFileNiceResult)
         {
             string folder = sha.Substring(0, 2);
             string name = sha.Substring(2) + "_raw.txt";
             string path = Path.Combine(Program.OBJECT_BASE, folder, name);
+            _rawPath = path;
             string[] lines = catFileNiceResult.Select(x => x.ToString()).ToArray();
-
             if(!File.Exists(path))
             {
                 // Only create the path if necessary

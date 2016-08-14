@@ -214,7 +214,8 @@ namespace GitSpect.Cmd
                 SHA = fullName
             };
 
-            Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
+            // This is what caches the path for the blobs path... kinda gross
+            newObject.WriteRawBlobToDisk(fullName, catFileNiceResult);
 
             return newObject;
         }
