@@ -41,7 +41,8 @@ namespace GitSpect.Cmd
         {
             GitObject mostConnected = null;
 
-
+            var refCountMax = _objectGraph.Select(x => x.Value.RefCount).Max();
+            mostConnected = _objectGraph.Select(x => x.Value).Where(x => x.RefCount == refCountMax).ToList().First();
 
             return mostConnected;
         }
