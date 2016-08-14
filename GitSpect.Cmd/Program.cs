@@ -193,7 +193,7 @@ namespace GitSpect.Cmd
                     newObject = CreateNewTree(fullName, catFileNiceResult, sizeInBytes);
                     break;
                 case "blob":
-                    newObject = CreateNewBlob(fullName, catFileNiceResult);
+                    newObject = CreateNewBlob(fullName, catFileNiceResult, sizeInBytes);
                     
                     break;
                 default:
@@ -207,12 +207,13 @@ namespace GitSpect.Cmd
             return newObject;
         }
 
-        private static GitObject CreateNewBlob(string fullName, PSObject[] catFileNiceResult)
+        private static GitObject CreateNewBlob(string fullName, PSObject[] catFileNiceResult, int bytes)
         {
             Blob newObject;
             newObject = new Blob()
             {
-                SHA = fullName
+                SHA = fullName,
+                Size = bytes
             };
 
             // This is what caches the path for the blobs path... kinda gross
