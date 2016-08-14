@@ -13,12 +13,13 @@ namespace GitSpect.Cmd
         public override string ToString()
         {
             StringBuilder prettyPrint = new StringBuilder();
+            string typeLine = string.Format("Type: {0}", Type);
+            string sizeLine = string.Format("Size: {0}", Size.ToString("D5"));
             string shaLine = string.Format("Object ID (SHA): {0}", SHA);
-            string typeAndSizeLine = string.Format("Type: {0} Size: {1}", Type, Size.ToString("D5"));
 
+            prettyPrint.AppendLine(typeLine);
+            prettyPrint.AppendLine(sizeLine);
             prettyPrint.AppendLine(shaLine);
-            prettyPrint.AppendLine(typeAndSizeLine);
-            prettyPrint.AppendLine();
 
             return prettyPrint.ToString();
         }
