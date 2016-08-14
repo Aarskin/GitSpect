@@ -25,16 +25,16 @@ namespace GitSpect.Cmd
         public GitObject Process(Commands command, params string[] args)
         {
             GitObject retVal = null;
-            string typeWord = "Unknown";
-
-            // Assumptions that should be formalized somewhere
-            if (args != null && !string.IsNullOrEmpty(args[0]))
+            GitObjects objectType = GitObjects.Unknown; 
+            string typeArg = "Unknown";
+            string followArg = string.Empty;
+       
+            if(command == Commands.Random)
             {
-                typeWord = args[0];
+                typeArg = args[0];
+                GitObjects objType = GitObjects.Unknown;
+                objectType = (Enum.TryParse(typeArg, out objType)) ? objType : GitObjects.Unknown;
             }
-
-            GitObjects objType = GitObjects.Unknown;
-            GitObjects objectType = (Enum.TryParse(typeWord, out objType)) ? objType : GitObjects.Unknown;
             
             switch (command)
             {
