@@ -152,17 +152,32 @@ namespace GitSpect.Cmd
         {
             Commit retVal;
             bool rootCommit = rawCommit[1].BaseObject.ToString().StartsWith("author");
+            bool mergeCommit = rawCommit[1].BaseObject.ToString().StartsWith("parent")
+                && rawCommit[2].BaseObject.ToString().StartsWith("parent");
 
-            if(rootCommit)
+            if (rootCommit)
             {
                 retVal = new Commit()
                 {
                     SHA = sha,
-                    Tree = (string)rawCommit[0].BaseObject,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
                     Parent = null,
-                    Author = (string)rawCommit[1].BaseObject,
-                    Committer = (string)rawCommit[2].BaseObject,
-                    Message = (string)rawCommit[4].BaseObject,
+                    Author = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                };
+            }
+            else if(mergeCommit)
+            {
+                retVal = new MergeCommit()
+                {
+                    SHA = sha,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    ParentA = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    ParentB = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[6].BaseObject.ToString().Split(' ')[1]
                 };
             }
             else
@@ -170,14 +185,13 @@ namespace GitSpect.Cmd
                 retVal = new Commit()
                 {
                     SHA = sha,
-                    Tree = (string)rawCommit[0].BaseObject,
-                    Parent = (string)rawCommit[1].BaseObject,
-                    Author = (string)rawCommit[2].BaseObject,
-                    Committer = (string)rawCommit[3].BaseObject,
-                    Message = (string)rawCommit[5].BaseObject,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    Parent = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[5].BaseObject.ToString().Split(' ')[1]
                 };
             }
-
 
             return retVal;
         }
