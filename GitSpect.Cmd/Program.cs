@@ -130,10 +130,11 @@ namespace GitSpect.Cmd
 
         private static Commands GetCommand()
         {
+            Commands retVal = Commands.Unknown;
             string stringCommand = Console.ReadLine();
-            Commands command = (Commands)Enum.Parse(typeof(Commands), stringCommand);
+            if (Enum.TryParse(stringCommand, out retVal)) { }
 
-            return command;
+            return retVal;
         }
 
         /// <summary>

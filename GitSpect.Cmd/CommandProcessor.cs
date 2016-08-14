@@ -49,7 +49,8 @@ namespace GitSpect.Cmd
 
         public enum Commands
         {
-            MostConnected
+            MostConnected,
+            Unknown
         }
     }
 }
