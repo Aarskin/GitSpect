@@ -8,15 +8,27 @@ namespace GitSpect.Cmd
 {
     public static class DictionaryExtensions
     {
+        private static Lazy<Dictionary<string, GitObject>> _stalledConnections
+            = new Lazy<Dictionary<string, GitObject>>();
+
         public static void CacheGitObject(this Dictionary<string, GitObject> me, GitObject gitObj)
         {
+            // Put this the main datastore
             me.Add(gitObj.SHA, gitObj);
 
             var touchedObjects = FindNewConnections(gitObj);
 
-            foreach (var obj in touchedObjects)
+            foreach (var objSha in touchedObjects)
             {
-                me[obj].UpdateReferences(gitObj);
+                if (me[objSha] != null)
+                {
+                    me[objSha].UpdateReferences(gitObj);
+                }
+                else
+                {
+                    // Save this connection, and recall it when the referenced object comes in
+                    _stalledConnections.Value.Add(objSha, gitObj);
+                }
             }
         }
 
