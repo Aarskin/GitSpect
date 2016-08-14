@@ -15,6 +15,7 @@ namespace GitSpect.Cmd
     {
         Blob,
         Tree,
-        Commit
+        Commit,
+        MergeCommit
     }
 }
