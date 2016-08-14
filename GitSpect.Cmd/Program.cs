@@ -121,18 +121,34 @@ namespace GitSpect.Cmd
             while (true)
             {
                 Console.Write("?> ");
-                Commands command = GetCommand();
-                var result = processor.Process(command);
+                string[] cmdArgs = null;
+                string[] command = GetCommand();
+                Commands mainCommand = Commands.Unknown;
+                Enum.TryParse(command[0], out mainCommand);
+
+                if(command.Length > 1)
+                {
+                    int i = 0;
+                    cmdArgs = new string[command.Length - 2];
+
+                    foreach (var arg in command)
+                    {
+                        cmdArgs[i++] = arg;
+                    }
+                }
+
+                var result = processor.Process(mainCommand, cmdArgs);
                 string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found" : result.ToString();
                 Console.WriteLine(report);
             }
         }
 
-        private static Commands GetCommand()
+        private static string[] GetCommand()
         {
-            Commands retVal = Commands.Unknown;
+            string[] retVal = null;
+
             string stringCommand = Console.ReadLine();
-            if (Enum.TryParse(stringCommand, out retVal)) { }
+            retVal = stringCommand.Split(' ');
 
             return retVal;
         }

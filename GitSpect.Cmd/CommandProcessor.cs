@@ -20,17 +20,30 @@ namespace GitSpect.Cmd
         /// </summary>
         /// <param name="command">Enum</param>
         /// <returns></returns>
-        public GitObject Process(Commands command)
+        public GitObject Process(Commands command, params string[] args)
         {
             GitObject retVal = null;
-            string secondWord = command.ToString().Split(' ')[1];
-            GitObjects objType = GitObjects.Unknown;
-            GitObjects objectType = (Enum.TryParse(secondWord, out objType)) ? objType : objType;
+            string typeWord = "Unknown";
 
+            // Assumptions that should be formalized somewhere
+            if (!string.IsNullOrEmpty(args[0]))
+            {
+                typeWord = args[0];
+            }
+
+            GitObjects objType = GitObjects.Unknown;
+            GitObjects objectType = (Enum.TryParse(typeWord, out objType)) ? objType : GitObjects.Unknown;
+            
             switch (command)
             {
                 case Commands.MostConnected:
                     retVal = FindMostConnectedObject();
+                    break;
+                case Commands.Random:
+                    retVal = FindRandomObject(objectType);
+                    break;
+                case Commands.Invalid:
+                    Console.WriteLine("Invalid command. Type ? for help.");
                     break;
                 default:
                     Console.WriteLine("Unknown command: '{0}'", command);
@@ -54,7 +67,8 @@ namespace GitSpect.Cmd
         {
             MostConnected,
             Random,
-            Unknown
+            Unknown,
+            Invalid
         }
     }
 }

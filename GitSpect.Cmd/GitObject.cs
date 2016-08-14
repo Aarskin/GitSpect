@@ -37,6 +37,7 @@ namespace GitSpect.Cmd
         Blob,
         Tree,
         Commit,
-        MergeCommit
+        MergeCommit,
+        Unknown
     }
 }
