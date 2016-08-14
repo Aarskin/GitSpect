@@ -12,33 +12,48 @@ namespace GitSpect.Cmd
         {
             me.Add(sha, gitObj);
 
-            RefreshConnections(gitObj);
+            var touchedObjects = FindNewConnections(gitObj);
         }
 
-        private static void RefreshConnections(GitObject gitObj)
+        private static List<string> FindNewConnections(GitObject gitObj)
         {
+            List<string> retVal;
+
             switch (gitObj.Type)
             {
                 case GitObjects.Tree:
-                    UpdateTreeConnections();
+                    retVal = UpdateTreeConnections();
                     break;
                 case GitObjects.Commit:
-                    UpdateCommitConnections();
+                    retVal = UpdateCommitConnections((Commit)gitObj);
                     break;
                 default:
                     // nothing to do for blobs
+                    retVal = new List<string>();
                     break;
             }
+
+            return retVal;
         }
 
-        private static void UpdateCommitConnections()
+        private static List<string> UpdateCommitConnections(Commit commitObj)
         {
-            throw new NotImplementedException();
+            List<string> touchedObjects = new List<string>();
+            string referencedParent = (commitObj.Parent != null) ? commitObj.Parent : null;
+            string referencedTree = commitObj.Tree;
+
+            if(referencedParent != null)
+            {
+                touchedObjects.Add(referencedParent);
+            }
+            touchedObjects.Add(referencedTree);
+
+            return touchedObjects;
         }
 
-        private static void UpdateTreeConnections()
+        private static List<string> UpdateTreeConnections()
         {
-            throw new NotImplementedException();
+            return new List<string>();
         }
     }
 }
