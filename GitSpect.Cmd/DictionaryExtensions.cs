@@ -8,37 +8,93 @@ namespace GitSpect.Cmd
 {
     public static class DictionaryExtensions
     {
-        public static void CacheGitObject(this Dictionary<string, GitObject> me, string sha, GitObject gitObj)
-        {
-            me.Add(sha, gitObj);
+        // Maps a GitObject's SHA to a list of objects that are referencing it - Shitty mode
+        private static Lazy<List<KeyValuePair<string, GitObject>>> _stalledConnections
+            = new Lazy<List<KeyValuePair<string, GitObject>>>();
 
-            RefreshConnections(gitObj);
-        }
-
-        private static void RefreshConnections(GitObject gitObj)
+        public static void CacheGitObject(this Dictionary<string, GitObject> me, GitObject gitObj)
         {
-            switch (gitObj.Type)
+            // Account for anything touching this object
+            var referencesToMe = _stalledConnections.Value.Where(x => x.Key == gitObj.SHA).Select(x => x.Value).ToList();
+            var referencesAsShas = referencesToMe.Select(x => x.SHA).ToList();
+            gitObj.RefCount += referencesToMe.Count;
+            gitObj.RefShas.AddRange(referencesAsShas);
+            _stalledConnections.Value.RemoveAll(x => x.Key == gitObj.SHA);
+
+            // Put this in the main datastore
+            me.Add(gitObj.SHA, gitObj);
+            
+            // Account for anything this object touches
+            var newTouches = FindNewConnections(gitObj);
+
+            foreach (var objSha in newTouches)
             {
-                case GitObjects.Tree:
-                    UpdateTreeConnections((Tree)gitObj);
-                    break;
-                case GitObjects.Commit:
-                    UpdateCommitConnections();
-                    break;
-                default:
-                    // nothing to do for blobs
-                    break;
+                if (me.ContainsKey(objSha))
+                {
+                    me[objSha].UpdateReferences(gitObj);
+                }
+                else
+                {
+                    // Save this connection, and recall it when the referenced object comes in
+                    _stalledConnections.Value.Add(new KeyValuePair<string, GitObject>(objSha, gitObj));
+                }
             }
         }
 
-        private static void UpdateCommitConnections()
+        private static List<string> FindNewConnections(GitObject gitObj)
         {
-            throw new NotImplementedException();
+            List<string> retVal;
+
+            switch (gitObj.Type)
+            {
+                case GitObjects.Tree:
+                    retVal = UpdateTreeConnections((Tree)gitObj);
+                    break;
+                case GitObjects.Commit:
+                    retVal = UpdateCommitConnections((Commit)gitObj);
+                    break;
+                case GitObjects.MergeCommit:
+                    retVal = UpdateCommitConnections((MergeCommit)gitObj);
+                    break;
+                default:
+                    // nothing to do for blobs
+                    retVal = new List<string>();
+                    break;
+            }
+
+            return retVal;
         }
 
-        private static void UpdateTreeConnections(Tree treeObj)
+        private static List<string> UpdateCommitConnections(Commit commitObj)
         {
-            
+            List<string> touchedObjects = new List<string>();
+            // For MergeCommits only
+            string referencedParentA, referencedParentB;
+            // This is a guard against the root commit, which has no parent
+            string referencedParent = (commitObj.Parent != null) ? commitObj.Parent : null;
+            string referencedTree = commitObj.Tree;            
+
+            if (referencedParent != null)
+            {
+                touchedObjects.Add(referencedParent);
+            }
+            else if (commitObj.Type == GitObjects.MergeCommit)
+            {
+                MergeCommit merge = (MergeCommit)commitObj;
+                referencedParentA = merge.ParentA;
+                referencedParentB = merge.ParentB;
+
+                touchedObjects.Add(referencedParentA);
+                touchedObjects.Add(referencedParentB);
+            }
+            touchedObjects.Add(referencedTree);
+
+            return touchedObjects;
+        }
+
+        private static List<string> UpdateTreeConnections(Tree treeObj)
+        {
+            return new List<string>();
         }
     }
 }

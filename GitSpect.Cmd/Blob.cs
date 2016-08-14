@@ -10,7 +10,7 @@ namespace GitSpect.Cmd
 {
     class Blob : GitObject
     {
-        public Blob()
+        public Blob() : base()
         {
             Type = GitObjects.Blob;
         }
