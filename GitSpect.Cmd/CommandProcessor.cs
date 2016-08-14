@@ -71,7 +71,27 @@ namespace GitSpect.Cmd
 
         private GitObject FollowObject(string identifier)
         {
-            GitObject followedObject = _objectGraph[identifier];
+            GitObject followedObject = null;
+            Commit currentCommit = (Commit)_currentObjectHandle;
+            Blob currentBlob = (Blob)_currentObjectHandle;
+            Tree currentTree = (Tree)_currentObjectHandle;
+
+            // Dangerous assumption, but whatever for now
+            if (identifier.Length == 40)
+            {
+              followedObject = _objectGraph[identifier];
+            }
+
+            switch (identifier)
+            {
+                case "Parent":
+                case "parent":
+                    followedObject = _objectGraph[currentCommit.Parent];
+                    break;
+                default:
+                    break;
+            }
+
             return followedObject;
         }
 
