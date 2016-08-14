@@ -15,6 +15,7 @@ namespace GitSpect.Cmd
             StringBuilder prettyPrint = new StringBuilder();
             string typeLine = string.Format("Type: {0}", Type);
             string sizeLine = string.Format("Size: {0}", Size.ToString("D5"));
+            string refCountLine = string.Format("RefCount: {0}", RefCount);
             string shaLine = string.Format("Object ID (SHA): {0}", SHA);
 
             prettyPrint.AppendLine(typeLine);
