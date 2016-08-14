@@ -8,9 +8,9 @@ namespace GitSpect.Cmd
 {
     public static class DictionaryExtensions
     {
-        public static void CacheGitObject(this Dictionary<string, GitObject> me, string sha, GitObject gitObj)
+        public static void CacheGitObject(this Dictionary<string, GitObject> me, GitObject gitObj)
         {
-            me.Add(sha, gitObj);
+            me.Add(gitObj.SHA, gitObj);
 
             var touchedObjects = FindNewConnections(gitObj);
 
