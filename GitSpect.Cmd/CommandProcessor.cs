@@ -44,6 +44,9 @@ namespace GitSpect.Cmd
                 case Commands.Random:
                     retVal = FindRandomObject(objectType);
                     break;
+                case Commands.Follow:
+                    retVal = FollowObject(args[0]);
+                    break;
                 case Commands.Invalid:
                     Console.WriteLine("Invalid command. Type ? for help.");
                     break;
@@ -53,6 +56,12 @@ namespace GitSpect.Cmd
             }
 
             return retVal;
+        }
+
+        private GitObject FollowObject(string identifier)
+        {
+            GitObject followedObject = _objectGraph[identifier];
+            return followedObject;
         }
 
         private GitObject FindRandomObject(GitObjects objType)
@@ -83,6 +92,7 @@ namespace GitSpect.Cmd
         {
             MostConnected,
             Random,
+            Follow,
             Unknown,
             Invalid
         }
