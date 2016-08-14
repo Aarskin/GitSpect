@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace GitSpect.Cmd
 {
@@ -7,6 +8,19 @@ namespace GitSpect.Cmd
         public GitObject()
         {
             RefShas = new List<string>();
+        }
+
+        public override string ToString()
+        {
+            StringBuilder prettyPrint = new StringBuilder();
+            string shaLine = string.Format("Object ID (SHA): {0}", SHA);
+            string typeAndSizeLine = string.Format("Type: {0} Size: {1}", Type.ToString("D3"), Size.ToString("D3"));
+
+            prettyPrint.AppendLine(shaLine);
+            prettyPrint.AppendLine(typeAndSizeLine);
+            prettyPrint.AppendLine();
+
+            return prettyPrint.ToString();
         }
 
         public string SHA;
