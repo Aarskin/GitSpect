@@ -22,8 +22,8 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string command = string.Format(@"cd {0}; ls", OBJECT_BASE);
-            gitObjectHints = ExecuteCommand(command);
+            string poshCommand = string.Format(@"cd {0}; ls", OBJECT_BASE);
+            gitObjectHints = ExecuteCommand(poshCommand);
 
             Stopwatch allObjsTimer = new Stopwatch();
             allObjsTimer.Start();
@@ -84,7 +84,23 @@ namespace GitSpect.Cmd
             int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
             Console.WriteLine("--- Objects loaded --- {0}:{1}:{2}.{3}",
                 elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds);
-            Console.ReadKey();
+            
+            while(true)
+            {
+                string command = GetCommand();
+
+                switch (command)
+                {
+                    default:
+                        Console.WriteLine("Unknown command: '{0}'", command);
+                        break;
+                }
+            }
+        }
+
+        private static string GetCommand()
+        {
+            return Console.ReadLine();
         }
 
         /// <summary>
