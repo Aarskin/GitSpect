@@ -23,6 +23,9 @@ namespace GitSpect.Cmd
         public GitObject Process(Commands command)
         {
             GitObject retVal = null;
+            string secondWord = command.ToString().Split(' ')[1];
+            GitObjects objType = GitObjects.Unknown;
+            GitObjects objectType = (Enum.TryParse(secondWord, out objType)) ? objType : objType;
 
             switch (command)
             {
@@ -50,6 +53,7 @@ namespace GitSpect.Cmd
         public enum Commands
         {
             MostConnected,
+            Random,
             Unknown
         }
     }
