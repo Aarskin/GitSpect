@@ -94,7 +94,19 @@ namespace GitSpect.Cmd
 
         private static List<string> UpdateTreeConnections(Tree treeObj)
         {
-            return new List<string>();
+            List<string> touchedObjects = new List<string>();
+
+            foreach (var data in treeObj.Trees)
+            {
+                touchedObjects.Add(data.SHA);
+            }
+
+            foreach (var data in treeObj.Blobs)
+            {
+                touchedObjects.Add(data.SHA);
+            }
+
+            return touchedObjects;
         }
     }
 }
