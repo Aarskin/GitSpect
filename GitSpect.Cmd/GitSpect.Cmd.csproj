@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Blob.cs" />
+    <Compile Include="CommandProcessor.cs" />
     <Compile Include="Commit.cs" />
     <Compile Include="DictionaryExtensions.cs" />
     <Compile Include="GitObjectExtensions.cs" />

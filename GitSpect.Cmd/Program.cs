@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
+using static GitSpect.Cmd.CommandProcessor;
 
 namespace GitSpect.Cmd
 {
@@ -84,23 +85,23 @@ namespace GitSpect.Cmd
             int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
             Console.WriteLine("--- Objects loaded --- {0}:{1}:{2}.{3}",
                 elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds);
-            
-            while(true)
-            {
-                string command = GetCommand();
 
-                switch (command)
-                {
-                    default:
-                        Console.WriteLine("Unknown command: '{0}'", command);
-                        break;
-                }
+
+            CommandProcessor processor = new CommandProcessor(_graphDictionary);
+
+            while (true)
+            {
+                Commands command = GetCommand();
+                processor.Process(command); 
             }
         }
 
-        private static string GetCommand()
+        private static Commands GetCommand()
         {
-            return Console.ReadLine();
+            string stringCommand = Console.ReadLine();
+            Commands command = (Commands)Enum.Parse(typeof(Commands), stringCommand);
+
+            return command;
         }
 
         /// <summary>
