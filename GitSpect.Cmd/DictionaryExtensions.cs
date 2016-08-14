@@ -20,7 +20,7 @@ namespace GitSpect.Cmd
             switch (gitObj.Type)
             {
                 case GitObjects.Tree:
-                    UpdateTreeConnections();
+                    UpdateTreeConnections((Tree)gitObj);
                     break;
                 case GitObjects.Commit:
                     UpdateCommitConnections();
@@ -36,9 +36,9 @@ namespace GitSpect.Cmd
             throw new NotImplementedException();
         }
 
-        private static void UpdateTreeConnections()
+        private static void UpdateTreeConnections(Tree treeObj)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }
