@@ -76,7 +76,7 @@ namespace GitSpect.Cmd
                     }
 
                     string report = string.Format(reportTemplate, gitObj.SHA.Substring(0, 5),
-                                                    gitObj.Size.ToString("D4"), type);
+                                                    gitObj.Size.ToString("D5"), type);
 
                     Console.Write(report);
                     firstObjInDirectory = false;
