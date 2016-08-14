@@ -29,7 +29,7 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            var getGitObjects = quickDebug ? PowerShellCommands.GET_LAST_15_MINUTES : PowerShellCommands.GET_ALL;
+            var getGitObjects = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
             string poshCommand = string.Format(@"cd {0}; {1}", OBJECT_BASE, getGitObjects);
             gitObjectHints = ExecuteCommand(poshCommand);
 
