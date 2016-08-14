@@ -131,11 +131,8 @@ namespace GitSpect.Cmd
                     newObject = CreateNewTree(fullName, catFileNiceResult);
                     break;
                 case "blob":
-                    Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
-                    newObject = new Blob()
-                    {
-                        SHA = fullName
-                    };
+                    newObject = CreateNewBlob(fullName, catFileNiceResult);
+                    
                     break;
                 default:
                     newObject = new Blob()
@@ -144,6 +141,19 @@ namespace GitSpect.Cmd
                     };
                     break;
             }
+
+            return newObject;
+        }
+
+        private static GitObject CreateNewBlob(string fullName, PSObject[] catFileNiceResult)
+        {
+            Blob newObject;
+            newObject = new Blob()
+            {
+                SHA = fullName
+            };
+
+            Blob.WriteRawBlobToDisk(fullName, catFileNiceResult);
 
             return newObject;
         }
