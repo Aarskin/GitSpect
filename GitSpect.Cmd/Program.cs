@@ -111,7 +111,9 @@ namespace GitSpect.Cmd
             while (true)
             {
                 Commands command = GetCommand();
-                processor.Process(command); 
+                var result = processor.Process(command);
+                string report = (result == null) ? "No Object Found" : result.ToString();
+                Console.WriteLine(report);
             }
         }
 
