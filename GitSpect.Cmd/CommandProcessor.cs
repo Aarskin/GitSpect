@@ -82,23 +82,60 @@ namespace GitSpect.Cmd
               followedObject = _objectGraph[identifier];
             }
 
+
+            switch (_currentObjectHandle.Type)
+            {
+                case GitObjects.Blob:
+                    break;
+                case GitObjects.Tree:
+                    break;
+                case GitObjects.Commit:
+                    FollowCommit(identifier);                    
+                    break;
+                case GitObjects.MergeCommit:
+                    break;
+                case GitObjects.Unknown:
+                    break;
+                default:
+                    break;
+            }
+
+            return followedObject;
+        }
+
+        private GitObject FollowCommit(string identifier)
+        {
+            GitObject followedObject = null;
+            Commit currentCommit = (Commit)_currentObjectHandle;
+
             switch (identifier)
             {
                 case "Parent":
                 case "parent":
-                    currentCommit = (Commit)_currentObjectHandle;
-
-                    if(_objectGraph.ContainsKey(currentCommit.Parent))
-                    {
-                        followedObject = _objectGraph[currentCommit.Parent];
-                    }
-                    else
-                    {
-                        followedObject = null;
-                    }
+                    followedObject = CachedObjectIfItExists(currentCommit.Parent);
+                    break;
+                case "Tree":
+                case "tree":
+                    followedObject = CachedObjectIfItExists(currentCommit.Tree);
                     break;
                 default:
                     break;
+            }
+
+            return followedObject;
+        }
+
+        private GitObject CachedObjectIfItExists(string followedSha)
+        {
+            GitObject followedObject = null;
+
+            if (_objectGraph.ContainsKey(followedSha))
+            {
+                followedObject = _objectGraph[followedSha];
+            }
+            else
+            {
+                followedObject = null;
             }
 
             return followedObject;
