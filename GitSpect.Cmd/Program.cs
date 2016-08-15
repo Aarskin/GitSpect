@@ -15,7 +15,7 @@ namespace GitSpect.Cmd
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         public const string REPO_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd";
         public const string ONE_LINE_TO_RULE_THEM_ALL = "-----------------------------------------------------------------";
-        private static Dictionary<string, GitObject> _graphDictionary;
+        private static GitObjectGraph _objectGraph;
 
         public static void Main(string[] args)
         {
@@ -30,7 +30,7 @@ namespace GitSpect.Cmd
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
-            _graphDictionary = new Dictionary<string, GitObject>();
+            _objectGraph = new GitObjectGraph();
             IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
@@ -56,7 +56,7 @@ namespace GitSpect.Cmd
                 {
                     if (!firstObjInDirectory) Console.WriteLine();
 
-                    _graphDictionary.CacheGitObject(gitObj);
+                    _objectGraph.CacheGitObject(gitObj);
 
                     // Track stats
                     totalSizeOfAllGraphObjects += gitObj.Size;
@@ -116,7 +116,7 @@ namespace GitSpect.Cmd
 #endregion
 
             // Finally, the actual command loop
-            CommandProcessor processor = new CommandProcessor(_graphDictionary);
+            CommandProcessor processor = new CommandProcessor(_objectGraph);
 
             while (true)
             {
