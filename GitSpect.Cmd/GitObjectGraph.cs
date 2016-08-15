@@ -10,7 +10,7 @@ namespace GitSpect.Cmd
 {
     public class GitObjectGraph : IEnumerable<GitObject>
     {
-        private Dictionary<string, GitObject> _underlyingDictionary;
+        private Lazy<List<KeyValuePair<string, GitObject>>> _underlyingLazyList;
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private string _headSha;
 
@@ -19,12 +19,12 @@ namespace GitSpect.Cmd
         public GitObjectGraph(string headSha)
         {
             _headSha = headSha;
-            _underlyingDictionary = new Dictionary<string, GitObject>();
+            _underlyingLazyList = new Lazy<List<KeyValuePair<string, GitObject>>>();
         }
 
         internal void Store(GitObject gitObj)
         {
-            _underlyingDictionary.Add(gitObj.SHA, gitObj);
+            _underlyingLazyList.Value.Add(new KeyValuePair<string, GitObject>(gitObj.SHA, gitObj));
         }
 
         /// <summary>
@@ -39,10 +39,10 @@ namespace GitSpect.Cmd
             bool retVal = false;
             found = null;
 
-            if (_underlyingDictionary.ContainsKey(objSha))
+            if (_underlyingLazyList.Value.Select(x => x.Key).Contains(objSha))
             {
                 retVal = true;
-                found = _underlyingDictionary[objSha];
+                found = _underlyingLazyList.Value.Where(x => x.Key == objSha).ToList().First().Value;
             }
 
             return retVal;
@@ -50,12 +50,12 @@ namespace GitSpect.Cmd
 
         public IEnumerator<GitObject> GetEnumerator()
         {
-            return _underlyingDictionary.Values.GetEnumerator();
+            return _underlyingLazyList.Value.Select(x => x.Value).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _underlyingDictionary.Values.GetEnumerator();
+            return _underlyingLazyList.Value.Select(x => x.Value).GetEnumerator();
         }
 
         internal GitObject Get(string identifier)
