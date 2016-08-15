@@ -14,14 +14,12 @@ namespace GitSpect.Cmd
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         private string _headSha;
 
-        public GitObjectGraph()
-        {
-            _underlyingDictionary = new Dictionary<string, GitObject>();
-        }
+        public GitObjectGraph() : this("no_head") { }
 
         public GitObjectGraph(string headSha)
         {
             _headSha = headSha;
+            _underlyingDictionary = new Dictionary<string, GitObject>();
         }
 
         internal void Store(GitObject gitObj)
