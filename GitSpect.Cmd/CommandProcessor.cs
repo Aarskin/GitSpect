@@ -72,9 +72,6 @@ namespace GitSpect.Cmd
         private GitObject FollowObject(string identifier)
         {
             GitObject followedObject = null;
-            Commit currentCommit;
-            Blob currentBlob;// = (Blob)_currentObjectHandle;
-            Tree currentTree;// = (Tree)_currentObjectHandle;
 
             // Dangerous assumption, but whatever for now
             if (identifier.Length == 40)
