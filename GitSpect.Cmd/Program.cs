@@ -15,6 +15,7 @@ namespace GitSpect.Cmd
         public const string OBJECT_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd\.git\objects";
         public const string REPO_BASE = @"C:\Users\mwiem\OneDrive\Projects\GitSpect.Cmd";
         public const string ONE_LINE_TO_RULE_THEM_ALL = "-----------------------------------------------------------------";
+        private static GitObjectGraph _objectGraph;
         private static Dictionary<string, GitObject> _graphDictionary;
 
         public static void Main(string[] args)
@@ -30,6 +31,7 @@ namespace GitSpect.Cmd
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
+            _objectGraph = new GitObjectGraph();
             _graphDictionary = new Dictionary<string, GitObject>();
             IEnumerable<PSObject> gitObjectHints;
 
