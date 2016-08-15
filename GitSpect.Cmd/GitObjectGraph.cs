@@ -24,7 +24,10 @@ namespace GitSpect.Cmd
 
         internal void Store(GitObject gitObj)
         {
-            _underlyingDictionary.Add(gitObj.SHA, gitObj);
+            if(!_underlyingDictionary.ContainsKey(gitObj.SHA))
+            {
+                _underlyingDictionary.Add(gitObj.SHA, gitObj);
+            }
         }
 
         /// <summary>
