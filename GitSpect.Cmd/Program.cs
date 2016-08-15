@@ -21,11 +21,14 @@ namespace GitSpect.Cmd
         {
             // Toggles
             bool quickDebug = Convert.ToBoolean(args[0]);
+            bool headStart = args[1] != null && !string.IsNullOrEmpty(args[1]);
+            string headStartSha = headStart ? args[1] : string.Empty;
 
             #region Object Graph Loading
 
             string quickDebugStatus = quickDebug ? "On" : "Off";
-            string welcomeHeader = string.Format("GitSpect v0.0.1 | QuickDebug {0}" , quickDebugStatus);
+            string headStartStatus = headStart ? args[1].Substring(0,5) : "Off";
+            string welcomeHeader = string.Format("GitSpect v0.0.1 | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
 
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
@@ -35,11 +38,15 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            var getGitObjects = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
-            string poshCommand = string.Format(@"cd {0}; {1}", OBJECT_BASE, getGitObjects);
-            gitObjectHints = ExecuteCommand(poshCommand);
+            string poshCommand = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
+            string headStartLookup = string.Format(PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2));
+            poshCommand = headStart ? headStartLookup : poshCommand; 
 
-            Stopwatch allObjsTimer = new Stopwatch();
+            // Note : HeadStart setting overrides QuickDebug 
+
+            gitObjectHints = ExecuteCommand(poshCommand);
+            
+                Stopwatch allObjsTimer = new Stopwatch();
             int totalSizeOfAllGraphObjects = 0;
             int totalNumberOfGraphObjects = 0;
             allObjsTimer.Start();
@@ -49,7 +56,7 @@ namespace GitSpect.Cmd
                 bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
-                IEnumerable<GitObject> gitObjs = ProcessPSObjectIntoGitObjects(hint);
+                IEnumerable<GitObject> gitObjs = headStart ? TraverseStartingAtCommit(headStartSha, 35) : ProcessPSObjectIntoGitObjects(hint);
                 objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)
