@@ -8,10 +8,10 @@ namespace GitSpect.Cmd
 {
     class CommandProcessor
     {
-        private Dictionary<string, GitObject> _objectGraph;
+        private GitObjectGraph _objectGraph;
         private Random _rng;
 
-        public CommandProcessor(Dictionary<string, GitObject> graphToSearch)
+        public CommandProcessor(GitObjectGraph graphToSearch)
         {
             _objectGraph = graphToSearch;
             _rng = new Random();
@@ -59,7 +59,7 @@ namespace GitSpect.Cmd
         {
             GitObject randomObject;
 
-            List<GitObject> listOfType = _objectGraph.Select(x => x.Value).Where(x => x.Type == objType).ToList();
+            List<GitObject> listOfType = _objectGraph.Where(x => x.Type == objType).ToList();
             int maxIndex = listOfType.Count > 0 ? listOfType.Count - 1 : 0;
             int randomIndex = _rng.Next(0, maxIndex);
 
@@ -73,8 +73,8 @@ namespace GitSpect.Cmd
         {
             GitObject mostConnected = null;
 
-            var refCountMax = _objectGraph.Select(x => x.Value.RefCount).Max();
-            mostConnected = _objectGraph.Select(x => x.Value).Where(x => x.RefCount == refCountMax).ToList().First();
+            var refCountMax = _objectGraph.Select(x => x.RefCount).ToList().Max();
+            mostConnected = _objectGraph.Where(x => x.RefCount == refCountMax).ToList().First();
 
             return mostConnected;
         }

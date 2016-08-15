@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace GitSpect.Cmd
 {
-    public static class DictionaryExtensions
+    public static class GitObjectGraphExtensions
     {
         // Maps a GitObject's SHA to a list of objects that are referencing it - Shitty mode
         private static Lazy<List<KeyValuePair<string, GitObject>>> _stalledConnections
             = new Lazy<List<KeyValuePair<string, GitObject>>>();
 
-        public static void CacheGitObject(this Dictionary<string, GitObject> me, GitObject gitObj)
+        public static void CacheGitObject(this GitObjectGraph me, GitObject gitObj)
         {
             // Account for anything touching this object
             var referencesToMe = _stalledConnections.Value.Where(x => x.Key == gitObj.SHA).Select(x => x.Value).ToList();
@@ -22,16 +22,17 @@ namespace GitSpect.Cmd
             _stalledConnections.Value.RemoveAll(x => x.Key == gitObj.SHA);
 
             // Put this in the main datastore
-            me.Add(gitObj.SHA, gitObj);
+            me.Store(gitObj);
             
             // Account for anything this object touches
             var newTouches = FindNewConnections(gitObj);
 
             foreach (var objSha in newTouches)
             {
-                if (me.ContainsKey(objSha))
+                GitObject found = null;
+                if (me.LookupObject(objSha, out found))
                 {
-                    me[objSha].UpdateReferences(gitObj);
+                    found.UpdateReferences(gitObj);
                 }
                 else
                 {
