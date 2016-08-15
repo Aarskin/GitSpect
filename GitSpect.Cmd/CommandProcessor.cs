@@ -85,10 +85,10 @@ namespace GitSpect.Cmd
                 case GitObjects.Blob:
                     break;
                 case GitObjects.Tree:
-                    FollowTree(identifier);
+                    followedObject = FollowTree(identifier);
                     break;
                 case GitObjects.Commit:
-                    FollowCommit(identifier);                    
+                    followedObject = FollowCommit(identifier);                    
                     break;
                 case GitObjects.MergeCommit:
                     break;
@@ -101,7 +101,7 @@ namespace GitSpect.Cmd
             return followedObject;
         }
 
-        private void FollowTree(string identifier)
+        private GitObject FollowTree(string identifier)
         {
             GitObject followedObject = null;
             Tree currentTree = (Tree)_currentObjectHandle;
@@ -125,6 +125,8 @@ namespace GitSpect.Cmd
                     followedObject = CachedObjectIfItExists(followedObjectSha);
                 }
             }
+
+            return followedObject;
         }
 
         private GitObject FollowCommit(string identifier)
