@@ -33,7 +33,7 @@ namespace GitSpect.Cmd
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
-            _objectGraph = headStart ? new GitObjectGraph() : new GitObjectGraph(args[1]);
+            _objectGraph = headStart ? new GitObjectGraph(args[1]) : new GitObjectGraph();
             IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
@@ -56,7 +56,7 @@ namespace GitSpect.Cmd
                 bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
-                IEnumerable<GitObject> gitObjs = headStart ? _objectGraph.TraverseStartingAtCommit(headStartSha, 35) : _objectGraph.ProcessPSObjectIntoGitObjects(hint, false);
+                IEnumerable<GitObject> gitObjs = headStart ? _objectGraph.TraverseStartingAtCommit(headStartSha, 15) : _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
                 objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)

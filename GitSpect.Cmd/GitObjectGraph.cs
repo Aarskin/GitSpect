@@ -65,9 +65,27 @@ namespace GitSpect.Cmd
             return found;
         }
 
-        internal IList<GitObject> TraverseStartingAtCommit(string headStartSha, int v)
+        internal IList<GitObject> TraverseStartingAtCommit(string headStartSha, int depth)
         {
-            throw new NotImplementedException();
+            List<GitObject> traversedObjects = new List<GitObject>();
+
+            var gitObjectsInDirectory = ProcessPSObjectIntoGitObjects(headStartSha.Substring(0, 2));
+            traversedObjects.AddRange(gitObjectsInDirectory);
+            // The where clause says "If this is a commit object, cast it and match on the _headSha"
+            // There can and will only be one match so First() is fine here
+            Commit nextCommit = (Commit)traversedObjects.Where(
+                x => x.Type == GitObjects.Commit ? ((Commit)x).SHA == _headSha : false).ToList().First();
+
+            for(int i = 0; i < depth; i++)
+            {
+                var gitObjectsInNewDirectory = ProcessPSObjectIntoGitObjects(nextCommit.SHA.Substring(0, 2));
+                traversedObjects.AddRange(gitObjectsInNewDirectory);
+
+                nextCommit = (Commit)traversedObjects.Where(
+                x => x.Type == GitObjects.Commit ? ((Commit)x).SHA == _headSha : false).ToList().First();
+            }
+
+            return traversedObjects;
         }
 
         /// <summary>
@@ -75,7 +93,7 @@ namespace GitSpect.Cmd
         /// </summary>
         /// <param name="firstTwoLetters">A directory containing one or more git objects</param>
         /// <returns>an enumeration of the objects in the directory, empty list if no results</returns>
-        public IList<GitObject> ProcessPSObjectIntoGitObjects(PSObject firstTwoLetters, bool headStart)
+        public IList<GitObject> ProcessPSObjectIntoGitObjects(string firstTwoLetters)
         {
             IList<GitObject> results = new List<GitObject>();
 
@@ -88,31 +106,24 @@ namespace GitSpect.Cmd
                 IEnumerable<string> gitObjects = directoryContents
                     .Select(x => x.ToString()).Where(x => !(x.ToString().EndsWith(".txt")));
 
-                if (headStart)
+                foreach (var theRestOfTheLetters in gitObjects)
                 {
+                    string fullName = firstTwoLetters.ToString() + theRestOfTheLetters.ToString();
 
-                }
-                else
-                {
-                    foreach (var theRestOfTheLetters in gitObjects)
-                    {
-                        string fullName = firstTwoLetters.ToString() + theRestOfTheLetters.ToString();
+                    // Run all the relevant commands on each object
+                    string catFileNiceCommand = string.Format(@"git cat-file {0} -p", fullName);
+                    var catFileNiceResult = Program.ExecuteCommand(catFileNiceCommand).ToArray();
+                    string catFileTypeCommand = string.Format(@"git cat-file {0} -t", fullName);
+                    var catFileTypeResult = Program.ExecuteCommand(catFileTypeCommand).ToArray();
+                    string catFileSizeCommand = string.Format(@"git cat-file {0} -s", fullName);
+                    var catFileSizeResult = Program.ExecuteCommand(catFileSizeCommand).ToArray();
 
-                        // Run all the relevant commands on each object
-                        string catFileNiceCommand = string.Format(@"git cat-file {0} -p", fullName);
-                        var catFileNiceResult = Program.ExecuteCommand(catFileNiceCommand).ToArray();
-                        string catFileTypeCommand = string.Format(@"git cat-file {0} -t", fullName);
-                        var catFileTypeResult = Program.ExecuteCommand(catFileTypeCommand).ToArray();
-                        string catFileSizeCommand = string.Format(@"git cat-file {0} -s", fullName);
-                        var catFileSizeResult = Program.ExecuteCommand(catFileSizeCommand).ToArray();
+                    // Parse metadata for GitObject
+                    int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
+                    string objectType = (string)catFileTypeResult[0].BaseObject;
+                    GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType, sizeInBytes);
 
-                        // Parse metadata for GitObject
-                        int sizeInBytes = int.Parse(((string)catFileSizeResult[0].BaseObject));
-                        string objectType = (string)catFileTypeResult[0].BaseObject;
-                        GitObject newObject = CreateNewObject(fullName, catFileNiceResult, objectType, sizeInBytes);
-
-                        results.Add(newObject);
-                    }
+                    results.Add(newObject);
                 }
             }
 
