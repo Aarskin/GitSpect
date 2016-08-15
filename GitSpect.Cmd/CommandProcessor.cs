@@ -76,7 +76,7 @@ namespace GitSpect.Cmd
             // Dangerous assumption, but whatever for now
             if (identifier.Length == 40)
             {
-              followedObject = _objectGraph[identifier];
+              followedObject = _objectGraph.Get(identifier);
             }
 
 
@@ -117,12 +117,12 @@ namespace GitSpect.Cmd
                 if(blob)
                 {
                     string followedObjectSha = currentTree.Blobs.Select(x => x.SHA).ToList()[index];
-                    followedObject = CachedObjectIfItExists(followedObjectSha);
+                    _objectGraph.LookupObject(followedObjectSha, out followedObject);
                 }
                 else if(tree)
                 {
                     string followedObjectSha = currentTree.Trees.Select(x => x.SHA).ToList()[index];
-                    followedObject = CachedObjectIfItExists(followedObjectSha);
+                    _objectGraph.LookupObject(followedObjectSha, out followedObject);
                 }
             }
 
@@ -138,30 +138,14 @@ namespace GitSpect.Cmd
             {
                 case "Parent":
                 case "parent":
-                    followedObject = CachedObjectIfItExists(currentCommit.Parent);
+                    _objectGraph.LookupObject(currentCommit.Parent, out followedObject);
                     break;
                 case "Tree":
                 case "tree":
-                    followedObject = CachedObjectIfItExists(currentCommit.Tree);
+                    _objectGraph.LookupObject(currentCommit.Tree, out followedObject);
                     break;
                 default:
                     break;
-            }
-
-            return followedObject;
-        }
-
-        private GitObject CachedObjectIfItExists(string followedSha)
-        {
-            GitObject followedObject = null;
-
-            if (_objectGraph.ContainsKey(followedSha))
-            {
-                followedObject = _objectGraph[followedSha];
-            }
-            else
-            {
-                followedObject = null;
             }
 
             return followedObject;

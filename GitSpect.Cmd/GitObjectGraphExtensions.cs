@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management.Automation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -108,6 +109,118 @@ namespace GitSpect.Cmd
             }
 
             return touchedObjects;
+        }
+
+        public static GitObject CreateNewBlob(this GitObjectGraph me, string fullName, PSObject[] catFileNiceResult, int bytes)
+        {
+            Blob newObject;
+            newObject = new Blob()
+            {
+                SHA = fullName,
+                Size = bytes
+            };
+
+            // This is what caches the path for the blobs path... kinda gross
+            newObject.WriteRawBlobToDisk(fullName, catFileNiceResult);
+
+            return newObject;
+        }
+
+        public static GitObject CreateNewCommit(this GitObjectGraph me, string sha, PSObject[] rawCommit, int sizeInBytes)
+        {
+            Commit retVal;
+            bool rootCommit = rawCommit[1].BaseObject.ToString().StartsWith("author");
+            bool mergeCommit = rawCommit[1].BaseObject.ToString().StartsWith("parent")
+                && rawCommit[2].BaseObject.ToString().StartsWith("parent");
+
+            if (rootCommit)
+            {
+                retVal = new Commit()
+                {
+                    SHA = sha,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    Parent = null,
+                    Author = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                };
+            }
+            else if(mergeCommit)
+            {
+                retVal = new MergeCommit()
+                {
+                    SHA = sha,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    ParentA = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    ParentB = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[6].BaseObject.ToString().Split(' ')[1]
+                };
+            }
+            else
+            {
+                retVal = new Commit()
+                {
+                    SHA = sha,
+                    Size = sizeInBytes,
+                    Tree = rawCommit[0].BaseObject.ToString().Split(' ')[1],
+                    Parent = rawCommit[1].BaseObject.ToString().Split(' ')[1],
+                    Author = rawCommit[2].BaseObject.ToString().Split(' ')[1],
+                    Committer = rawCommit[3].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[5].BaseObject.ToString().Split(' ')[1]
+                };
+            }
+
+            return retVal;
+        }
+
+        public static GitObject CreateNewTree(this GitObjectGraph me, string sha, PSObject[] catFileNiceResult, int sizeInBytes)
+        {
+            int index = 0;
+            int numLines = catFileNiceResult.Length;
+            List<TreeInternalData> blobs = new List<TreeInternalData>();
+            List<TreeInternalData> trees = new List<TreeInternalData>();
+
+            foreach (var line in catFileNiceResult)
+            {
+                string[] lineMeta = line.BaseObject.ToString().Split(' ');
+                string[] shaName = lineMeta[2].Split('\t');
+
+                TreeInternalData data = new TreeInternalData()
+                {
+                    ModeCode = lineMeta[0],
+                    SHA = shaName[0],
+                    FileName = shaName[1]
+                };
+
+                // Trees are a collection of trees and blobs
+                switch (lineMeta[1])
+                {
+                    case "blob":
+                        blobs.Add(data);
+                        break;
+                    case "tree":
+                        trees.Add(data);
+                        break;
+                    default:
+                        break;
+                }
+
+                index++;
+            }               
+
+            GitObject newTree = new Tree()
+            {
+                Blobs = blobs,
+                SHA = sha,
+                Size = sizeInBytes,
+                Trees = trees
+            };
+
+            return newTree;
         }
     }
 }
