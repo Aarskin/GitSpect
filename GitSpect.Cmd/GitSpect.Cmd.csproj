@@ -50,8 +50,9 @@
     <Compile Include="Blob.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Commit.cs" />
-    <Compile Include="DictionaryExtensions.cs" />
+    <Compile Include="GitObjectGraphExtensions.cs" />
     <Compile Include="GitObjectExtensions.cs" />
+    <Compile Include="GitObjectGraph.cs" />
     <Compile Include="MergeCommit.cs" />
     <Compile Include="PowerShellCommands.cs" />
     <Compile Include="TreeInternalData.cs" />
