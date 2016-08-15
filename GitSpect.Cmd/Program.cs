@@ -33,20 +33,20 @@ namespace GitSpect.Cmd
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
-            _objectGraph = new GitObjectGraph();
+            _objectGraph = headStart ? new GitObjectGraph() : new GitObjectGraph(args[1]);
             IEnumerable<PSObject> gitObjectHints;
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
             string poshCommand = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
-            string headStartLookup = string.Format(PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2));
+            string headStartLookup = string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2));
             poshCommand = headStart ? headStartLookup : poshCommand; 
 
             // Note : HeadStart setting overrides QuickDebug 
 
             gitObjectHints = ExecuteCommand(poshCommand);
             
-                Stopwatch allObjsTimer = new Stopwatch();
+            Stopwatch allObjsTimer = new Stopwatch();
             int totalSizeOfAllGraphObjects = 0;
             int totalNumberOfGraphObjects = 0;
             allObjsTimer.Start();
@@ -56,7 +56,7 @@ namespace GitSpect.Cmd
                 bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
-                IEnumerable<GitObject> gitObjs = headStart ? _objectGraph.TraverseStartingAtCommit(headStartSha, 35) : _objectGraph.ProcessPSObjectIntoGitObjects(hint);
+                IEnumerable<GitObject> gitObjs = headStart ? _objectGraph.TraverseStartingAtCommit(headStartSha, 35) : _objectGraph.ProcessPSObjectIntoGitObjects(hint, false);
                 objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)

@@ -12,6 +12,8 @@ namespace GitSpect.Cmd
 
         public const string GET_ALL = "ls";
 
-        public const string OBJECT_TEMPLATE = "ls | where {$_.Name -eq \"{0}\"}";
-}
+        public const string OBJECT_TEMPLATE = "ls | where {{$_.Name -eq \"{0}\"}}";
+
+        public static string CD_BASE = "cd " + Program.OBJECT_BASE;
+    }
 }
