@@ -85,6 +85,7 @@ namespace GitSpect.Cmd
                 case GitObjects.Blob:
                     break;
                 case GitObjects.Tree:
+                    FollowTree(identifier);
                     break;
                 case GitObjects.Commit:
                     FollowCommit(identifier);                    
@@ -98,6 +99,32 @@ namespace GitSpect.Cmd
             }
 
             return followedObject;
+        }
+
+        private void FollowTree(string identifier)
+        {
+            GitObject followedObject = null;
+            Tree currentTree = (Tree)_currentObjectHandle;
+
+            // Dangerous assumption
+            if (identifier.Length == 2)
+            {
+                char[] code = identifier.ToCharArray();
+                bool blob = (code[0] == 'B') || (code[0] == 'b');
+                bool tree = (code[0] == 'T') || (code[0] == 't');
+                int index = int.Parse(code[1].ToString());
+
+                if(blob)
+                {
+                    string followedObjectSha = currentTree.Blobs.Select(x => x.SHA).ToList()[index];
+                    followedObject = CachedObjectIfItExists(followedObjectSha);
+                }
+                else if(tree)
+                {
+                    string followedObjectSha = currentTree.Trees.Select(x => x.SHA).ToList()[index];
+                    followedObject = CachedObjectIfItExists(followedObjectSha);
+                }
+            }
         }
 
         private GitObject FollowCommit(string identifier)
