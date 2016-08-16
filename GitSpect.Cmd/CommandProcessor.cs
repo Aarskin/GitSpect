@@ -50,15 +50,15 @@ namespace GitSpect.Cmd
             {
                 case "mostconnected":
                 case "mc":
-                    retVal = FindMostConnectedObject();
+                    retVal = FindMostConnectedObject(graph);
                     break;
                 case "random":
                 case "r":
-                    retVal = FindRandomObject(objectType);
+                    retVal = FindRandomObject(objectType, graph);
                     break;
                 case "follow":
                 case "f":
-                    retVal = FollowObject(args[0]);
+                    retVal = FollowObject(args[0], graph);
                     break;
                 case "invalid":
                     Console.WriteLine("Invalid command. Type ? for help.");
