@@ -181,10 +181,10 @@ namespace GitSpect.Cmd
 
         public enum Commands
         {
+            Unknown,
             MostConnected,
             Random,
             Follow,
-            Unknown,
             Invalid
         }
     }
