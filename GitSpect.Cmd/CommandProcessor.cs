@@ -44,19 +44,25 @@ namespace GitSpect.Cmd
                 GitObjects objType = GitObjects.Unknown;
                 objectType = (Enum.TryParse(typeArg, out objType)) ? objType : GitObjects.Unknown;
             }
-            
-            switch (command)
+
+            // Poor man's matching. Types are in the way here.
+            string strCommand = command.ToString().ToLower();
+
+            switch (strCommand)
             {
-                case Commands.MostConnected:
+                case "mostconnected":
+                case "mc":
                     retVal = FindMostConnectedObject();
                     break;
-                case Commands.Random:
+                case "random":
+                case "r":
                     retVal = FindRandomObject(objectType);
                     break;
-                case Commands.Follow:
+                case "follow":
+                case "f":
                     retVal = FollowObject(args[0]);
                     break;
-                case Commands.Invalid:
+                case "invalid":
                     Console.WriteLine("Invalid command. Type ? for help.");
                     break;
                 default:
