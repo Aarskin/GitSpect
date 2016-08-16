@@ -63,6 +63,7 @@ namespace GitSpect.Cmd
                 {
                     if (!firstObjInDirectory) Console.WriteLine();
 
+                    // Keep track of this object
                     _objectGraph.CacheGitObject(gitObj);
 
                     // Track stats

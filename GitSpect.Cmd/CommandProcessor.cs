@@ -157,7 +157,7 @@ namespace GitSpect.Cmd
             int maxIndex = listOfType.Count > 0 ? listOfType.Count - 1 : 0;
             int randomIndex = _rng.Next(0, maxIndex);
 
-            // yeah, we lose one here, but whatever
+            // yeah, we lose access to only one here, but whatever
             randomObject = maxIndex > 0 ? listOfType[randomIndex] : null;
 
             return randomObject;
