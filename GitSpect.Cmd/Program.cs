@@ -21,7 +21,7 @@ namespace GitSpect.Cmd
         {
             // Toggles
             bool quickDebug = Convert.ToBoolean(args[0]);
-            bool headStart = args[1] != null && !string.IsNullOrEmpty(args[1]);
+            bool headStart = args.Length > 2 && !string.IsNullOrEmpty(args[1]);
             string headStartSha = headStart ? args[1] : string.Empty;
 
             #region Object Graph Loading
@@ -38,9 +38,13 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string poshCommand = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
-            string headStartLookup = string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2));
-            poshCommand = headStart ? headStartLookup : poshCommand; 
+            string classicCommand = quickDebug ?
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_LAST_5_MINUTES) :
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_ALL);
+            string headStartCommand = headStart ? 
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
+                string.Empty;
+            string poshCommand = headStart ? headStartCommand : classicCommand; 
 
             // Note : HeadStart setting overrides QuickDebug 
 
@@ -63,6 +67,7 @@ namespace GitSpect.Cmd
                 {
                     if (!firstObjInDirectory) Console.WriteLine();
 
+                    // Keep track of this object
                     _objectGraph.CacheGitObject(gitObj);
 
                     // Track stats
@@ -122,8 +127,8 @@ namespace GitSpect.Cmd
             writer.Close();
 #endregion
 
-            // Finally, the actual command loop
-            CommandProcessor processor = new CommandProcessor(_objectGraph);
+            // Finally, the actual command loop (maintain graph state out here.)
+            CommandProcessor processor = new CommandProcessor();
 
             while (true)
             {
@@ -144,7 +149,7 @@ namespace GitSpect.Cmd
                     }
                 }
 
-                var result = processor.Process(mainCommand, cmdArgs);
+                var result = processor.Process(mainCommand, _objectGraph, cmdArgs);
                 string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found" : result.ToString();
                 Console.WriteLine(report);
             }
