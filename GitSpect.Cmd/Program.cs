@@ -28,7 +28,7 @@ namespace GitSpect.Cmd
 
             string quickDebugStatus = quickDebug ? "On" : "Off";
             string headStartStatus = headStart ? args[1].Substring(0, 5) : "Off";
-            string welcomeHeader = string.Format("GitSpect v0.0.1 | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
+            string welcomeHeader = string.Format("GitSpect ALPHA | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
 
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
