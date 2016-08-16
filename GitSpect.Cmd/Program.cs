@@ -21,7 +21,7 @@ namespace GitSpect.Cmd
         {
             // Toggles
             bool quickDebug = Convert.ToBoolean(args[0]);
-            bool headStart = args[1] != null && !string.IsNullOrEmpty(args[1]);
+            bool headStart = args.Length > 2 && !string.IsNullOrEmpty(args[1]);
             string headStartSha = headStart ? args[1] : string.Empty;
 
             #region Object Graph Loading
@@ -39,7 +39,9 @@ namespace GitSpect.Cmd
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
             string poshCommand = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
-            string headStartLookup = string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2));
+            string headStartLookup = headStart ? 
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
+                string.Empty;
             poshCommand = headStart ? headStartLookup : poshCommand; 
 
             // Note : HeadStart setting overrides QuickDebug 
