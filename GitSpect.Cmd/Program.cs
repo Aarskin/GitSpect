@@ -135,6 +135,7 @@ namespace GitSpect.Cmd
                 string[] cmdArgs = null;
                 string[] command = GetCommand();
                 Commands mainCommand = Commands.Unknown;
+                // Empty string parses to "MostConnected"...
                 Enum.TryParse(command[0], out mainCommand);
 
                 if(command.Length > 1)
