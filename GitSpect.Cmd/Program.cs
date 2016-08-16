@@ -38,11 +38,13 @@ namespace GitSpect.Cmd
 
             // Get the first two letters of all the git objects 
             // (also path and info, but we don't care about those yet)
-            string poshCommand = quickDebug ? PowerShellCommands.GET_LAST_5_MINUTES : PowerShellCommands.GET_ALL;
-            string headStartLookup = headStart ? 
+            string classicCommand = quickDebug ?
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_LAST_5_MINUTES) :
+                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_ALL);
+            string headStartCommand = headStart ? 
                 string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
                 string.Empty;
-            poshCommand = headStart ? headStartLookup : poshCommand; 
+            string poshCommand = headStart ? headStartCommand : classicCommand; 
 
             // Note : HeadStart setting overrides QuickDebug 
 
