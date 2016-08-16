@@ -147,8 +147,8 @@ namespace GitSpect.Cmd
                 string[] parsed = hopefullyParseable.Split(' ');
 
                 Commands mainCommand = Commands.Unknown;
-                // Empty string parses to "MostConnected"...
-                Enum.TryParse(hopefullyParseable, out mainCommand);
+                // Parse failure defaults to "MostConnected"
+                Enum.TryParse(parsed[0], out mainCommand);
 
                 if(cmd.Length > 1)
                 {
