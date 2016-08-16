@@ -60,17 +60,18 @@ namespace GitSpect.Cmd
             // Multiple hints when headstart == false, One when true
             foreach (var hint in gitObjectHints)
             {
-                bool firstObjInDirectory = true;
                 int depthTracker = 0;
-                Stopwatch objTimer = new Stopwatch();
-                objTimer.Start();
-                IEnumerable<GitObject> gitObjs = headStart ?
-                    _objectGraph.SloppyLoadCommit(headStartSha, true) :
-                    _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
-                objTimer.Stop();
-
+                string currentCommitSha = headStart ? headStartSha : string.Empty;
                 do
                 {
+                    bool firstObjInDirectory = true;
+                    Stopwatch objTimer = new Stopwatch();
+
+                    objTimer.Start();
+                    IEnumerable<GitObject> gitObjs = headStart ?
+                        _objectGraph.SloppyLoadCommit(currentCommitSha, true) :
+                        _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
+                    objTimer.Stop();
 
                     foreach (var gitObj in gitObjs)
                     {
@@ -112,12 +113,22 @@ namespace GitSpect.Cmd
                         firstObjInDirectory = false;
                     }
 
-                    string stats = string.Format("Directory {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                    string parsedDirectory = headStart ? currentCommitSha.Substring(0, 2) : hint.ToString();
+                    string stats = string.Format("Directory {0} parsed. Took {1} ms", parsedDirectory, objTimer.ElapsedMilliseconds);
                     Console.Write(stats);
                     Console.WriteLine();
 
+                    if (headStart)
+                    {
+                        GitObject thisObject;
+                        _objectGraph.LookupObject(currentCommitSha, out thisObject);
+                        Commit thisCommit = (Commit)thisObject;
+
+                        currentCommitSha = thisCommit.Parent;
+                    }
+
                     // Yup, this is how the headstart starting depth limit is hardcoded
-                } while (headStart && depthTracker++ < 15);
+                } while (headStart && depthTracker++ < 5);
 
                 allObjsTimer.Stop();
 
@@ -178,7 +189,7 @@ namespace GitSpect.Cmd
             string retVal = null;
             retVal = Console.ReadLine();
             return retVal;
-        }       
+        }
 
         /// <summary>
         /// Execute a command string using PowerShell, synchronously
