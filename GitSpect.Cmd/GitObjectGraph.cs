@@ -92,6 +92,20 @@ namespace GitSpect.Cmd
         }
 
         /// <summary>
+        /// By default, this method will include all gitobjects from a hint directory,
+        /// (taking advantage of locality) rather than specifically picking out the passed sha.
+        /// </summary>
+        /// <param name="headStartSha">The commit sha gauranteed to load.</param>
+        /// <param name="include">Controls whether or not there is a guarantee that all of 
+        /// your commits and trees will be fully connected (takes longer).</param>
+        /// <returns></returns>
+        internal IList<GitObject> SloppyLoadCommit(string headStartSha, bool include)
+        {
+            var gitObjectsInDirectory = ProcessPSObjectIntoGitObjects(headStartSha.Substring(0, 2));
+            return gitObjectsInDirectory;
+        }
+
+        /// <summary>
         /// Turns a /a5/ style directory name into the list of gitobjects contained within
         /// </summary>
         /// <param name="firstTwoLetters">A directory containing one or more git objects</param>

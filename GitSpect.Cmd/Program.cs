@@ -27,7 +27,7 @@ namespace GitSpect.Cmd
             #region Object Graph Loading
 
             string quickDebugStatus = quickDebug ? "On" : "Off";
-            string headStartStatus = headStart ? args[1].Substring(0,5) : "Off";
+            string headStartStatus = headStart ? args[1].Substring(0, 5) : "Off";
             string welcomeHeader = string.Format("GitSpect v0.0.1 | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
 
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
@@ -38,130 +38,138 @@ namespace GitSpect.Cmd
 
             // This could be a lot less wordy
             string classicCommand = quickDebug ?
-                string.Format(PowerShellCommands.CD_BASE + "; " + 
+                string.Format(PowerShellCommands.CD_BASE + "; " +
                 PowerShellCommands.GET_LAST_5_MINUTES) :
-                string.Format(PowerShellCommands.CD_BASE + "; " + 
+                string.Format(PowerShellCommands.CD_BASE + "; " +
                 PowerShellCommands.GET_ALL);
-            string headStartCommand = headStart ? 
-                string.Format(PowerShellCommands.CD_BASE + "; " + 
-                PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
+            string headStartCommand = headStart ?
+                string.Format(PowerShellCommands.CD_BASE + "; " +
+                PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0, 2)) :
                 string.Empty;
-            string poshCommand = headStart ? headStartCommand : classicCommand; 
+            string poshCommand = headStart ? headStartCommand : classicCommand;
 
             // Note : HeadStart setting overrides QuickDebug 
-
+            // Get our starting PSObject(s) - two character folder name(s)
             gitObjectHints = ExecuteCommand(poshCommand);
-            
+
             Stopwatch allObjsTimer = new Stopwatch();
             int totalSizeOfAllGraphObjects = 0;
             int totalNumberOfGraphObjects = 0;
             allObjsTimer.Start();
 
+            // Multiple hints when headstart == false, One when true
             foreach (var hint in gitObjectHints)
             {
                 bool firstObjInDirectory = true;
+                int depthTracker = 0;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
-                IEnumerable<GitObject> gitObjs = headStart ? 
-                    _objectGraph.TraverseStartingAtCommit(headStartSha, 15) : 
+                IEnumerable<GitObject> gitObjs = headStart ?
+                    _objectGraph.SloppyLoadCommit(headStartSha, true) :
                     _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
                 objTimer.Stop();
 
-                foreach (var gitObj in gitObjs)
+                do
                 {
-                    if (!firstObjInDirectory) Console.WriteLine();
 
-                    // Keep track of this object
-                    _objectGraph.CacheGitObject(gitObj);
-
-                    // Track stats
-                    totalSizeOfAllGraphObjects += gitObj.Size;
-                    totalNumberOfGraphObjects++;
-
-                    // Report to the console
-                    string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
-                    string type;
-                    switch (gitObj.Type)
+                    foreach (var gitObj in gitObjs)
                     {
-                        case GitObjects.Blob:
-                            type = " B ";
-                            break;
-                        case GitObjects.Tree:
-                            type = " T ";
-                            break;
-                        case GitObjects.Commit:
-                            type = " C ";
-                            break;
-                        case GitObjects.MergeCommit:
-                            type = " M ";
-                            break;
-                        default:
-                            type = " | ";
-                            break;
+                        if (!firstObjInDirectory) Console.WriteLine();
+
+                        // Keep track of this object
+                        _objectGraph.CacheGitObject(gitObj);
+
+                        // Track stats
+                        totalSizeOfAllGraphObjects += gitObj.Size;
+                        totalNumberOfGraphObjects++;
+
+                        // Report to the console
+                        string reportTemplate = "SHA: {0} Size: {1} Type: {2} ";
+                        string type;
+                        switch (gitObj.Type)
+                        {
+                            case GitObjects.Blob:
+                                type = " B ";
+                                break;
+                            case GitObjects.Tree:
+                                type = " T ";
+                                break;
+                            case GitObjects.Commit:
+                                type = " C ";
+                                break;
+                            case GitObjects.MergeCommit:
+                                type = " M ";
+                                break;
+                            default:
+                                type = " | ";
+                                break;
+                        }
+
+                        string report = string.Format(reportTemplate, gitObj.SHA.Substring(0, 5),
+                                                        gitObj.Size.ToString("D5"), type);
+
+                        Console.Write(report);
+                        firstObjInDirectory = false;
                     }
 
-                    string report = string.Format(reportTemplate, gitObj.SHA.Substring(0, 5),
-                                                    gitObj.Size.ToString("D5"), type);
+                    string stats = string.Format("Directory {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
+                    Console.Write(stats);
+                    Console.WriteLine();
 
-                    Console.Write(report);
-                    firstObjInDirectory = false;
-                }
+                    // Yup, this is how the headstart starting depth limit is hardcoded
+                } while (headStart && depthTracker++ < 15);
 
-                string stats = string.Format("Directory {0} parsed. Took {1} ms", hint, objTimer.ElapsedMilliseconds);
-                Console.Write(stats);
-                Console.WriteLine();
-            }
+                allObjsTimer.Stop();
 
-            allObjsTimer.Stop();
+                // Record stats
+                int elapsedHours = allObjsTimer.Elapsed.Hours;
+                int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
+                int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
+                int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
+                string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Bytes: {4}, # Objs: {5}",
+                    elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects, totalNumberOfGraphObjects);
+                Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
+                Console.WriteLine(overallReport);
+                Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
 
-            int elapsedHours = allObjsTimer.Elapsed.Hours;
-            int elapsedMinutes = allObjsTimer.Elapsed.Minutes;
-            int elapsedSeconds = allObjsTimer.Elapsed.Seconds;
-            int elapsedMilliSeconds = allObjsTimer.Elapsed.Milliseconds;
-            string overallReport = string.Format("--- Objects loaded --- {0}:{1}:{2}.{3}. Bytes: {4}, # Objs: {5}",
-                elapsedHours, elapsedMinutes, elapsedSeconds, elapsedMilliSeconds, totalSizeOfAllGraphObjects, totalNumberOfGraphObjects);
-            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
-            Console.WriteLine(overallReport);
-            Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
+                var reportingPath = Path.Combine(REPO_BASE, "SizeLog.txt");
+                var writer = File.AppendText(reportingPath);
+                writer.Write(DateTime.Now.ToString() + " " + overallReport);
+                writer.Flush();
+                writer.Close();
+                #endregion
 
-            var reportingPath = Path.Combine(REPO_BASE, "SizeLog.txt");
-            var writer = File.AppendText(reportingPath);
-            writer.Write(DateTime.Now.ToString() + " " + overallReport);
-            writer.Flush();
-            writer.Close();
-#endregion
+                // Finally, the actual command loop (maintain graph state out here.)
+                CommandProcessor processor = new CommandProcessor();
 
-            // Finally, the actual command loop (maintain graph state out here.)
-            CommandProcessor processor = new CommandProcessor();
-
-            while (true)
-            {
-                string handle = processor.CurrentHandle;
-                Console.Write("{0}> ", handle);
-
-                // Fragile
-                string[] cmdArgs = null;
-                string command = GetCommand();
-                string[] cmd = command.Split(' ');
-                string hopefullyParseable = command.ToLower().ToTitleCase();
-                string[] parsed = hopefullyParseable.Split(' ');
-
-                Commands mainCommand = Commands.Unknown;
-                Enum.TryParse(parsed[0], out mainCommand);
-
-                if(cmd.Length > 1)
+                while (true)
                 {
-                    cmdArgs = new string[cmd.Length - 1];
+                    string handle = processor.CurrentHandle;
+                    Console.Write("{0}> ", handle);
 
-                    for(int i = 1; i < cmd.Length; i++)
+                    // Fragile
+                    string[] cmdArgs = null;
+                    string command = GetCommand();
+                    string hopefullyParseable = command.ToLower().ToTitleCase();
+                    string[] parsed = hopefullyParseable.Split(' ');
+
+                    Commands mainCommand = Commands.Unknown;
+                    Enum.TryParse(parsed[0], out mainCommand);
+
+                    if (parsed.Length > 1)
                     {
-                        cmdArgs[i-1] = cmd[i];
-                    }
-                }
+                        cmdArgs = new string[parsed.Length - 1];
 
-                var result = processor.Process(mainCommand, _objectGraph, cmdArgs);
-                string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found" : result.ToString();
-                Console.WriteLine(report);
+                        for (int i = 1; i < parsed.Length; i++)
+                        {
+                            cmdArgs[i - 1] = parsed[i];
+                        }
+                    }
+
+                    var result = processor.Process(mainCommand, _objectGraph, cmdArgs);
+                    string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found" : result.ToString();
+                    Console.WriteLine(report);
+                }
             }
         }
 
