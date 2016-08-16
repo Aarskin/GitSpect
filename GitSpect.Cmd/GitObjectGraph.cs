@@ -32,7 +32,7 @@ namespace GitSpect.Cmd
 
         /// <summary>
         /// Looks up an object, returning true and populating the out variable if it exists.
-        /// Returns false and a null object if it does not exist
+        /// Returns false and a null object if it does not exist.
         /// </summary>
         /// <param name="objSha"></param>
         /// <param name="found"></param>

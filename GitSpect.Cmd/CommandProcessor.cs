@@ -8,7 +8,6 @@ namespace GitSpect.Cmd
 {
     class CommandProcessor
     {
-        private GitObjectGraph _objectGraph;
         private Random _rng;
         private GitObject _currentObjectHandle;
 
@@ -20,18 +19,17 @@ namespace GitSpect.Cmd
             }
         }
 
-        public CommandProcessor(GitObjectGraph graphToSearch)
+        public CommandProcessor()
         {
-            _objectGraph = graphToSearch;
             _rng = new Random();
         }
 
         /// <summary>
-        /// Process the command, returning a GitObject. Null may be returned.
+        /// Process the command on the given graph, returning a GitObject. Null may be returned.
         /// </summary>
         /// <param name="command">Enum</param>
         /// <returns></returns>
-        public GitObject Process(Commands command, params string[] args)
+        public GitObject Process(Commands command, GitObjectGraph graph, params string[] args)
         {
             GitObject retVal = null;
             GitObjects objectType = GitObjects.Unknown; 
@@ -48,13 +46,13 @@ namespace GitSpect.Cmd
             switch (command)
             {
                 case Commands.MostConnected:
-                    retVal = FindMostConnectedObject();
+                    retVal = FindMostConnectedObject(graph);
                     break;
                 case Commands.Random:
-                    retVal = FindRandomObject(objectType);
+                    retVal = FindRandomObject(objectType, graph);
                     break;
                 case Commands.Follow:
-                    retVal = FollowObject(args[0]);
+                    retVal = FollowObject(args[0], graph);
                     break;
                 case Commands.Invalid:
                     Console.WriteLine("Invalid command. Type ? for help.");
@@ -69,14 +67,14 @@ namespace GitSpect.Cmd
             return retVal;
         }
 
-        private GitObject FollowObject(string identifier)
+        private GitObject FollowObject(string identifier, GitObjectGraph graph)
         {
             GitObject followedObject = null;
 
             // Dangerous assumption, but whatever for now
             if (identifier.Length == 40)
             {
-              followedObject = _objectGraph.Get(identifier);
+              followedObject = graph.Get(identifier);
             }
 
 
@@ -85,10 +83,10 @@ namespace GitSpect.Cmd
                 case GitObjects.Blob:
                     break;
                 case GitObjects.Tree:
-                    followedObject = FollowTree(identifier);
+                    followedObject = FollowTree(identifier, graph);
                     break;
                 case GitObjects.Commit:
-                    followedObject = FollowCommit(identifier);                    
+                    followedObject = FollowCommit(identifier, graph);                    
                     break;
                 case GitObjects.MergeCommit:
                     break;
@@ -101,7 +99,7 @@ namespace GitSpect.Cmd
             return followedObject;
         }
 
-        private GitObject FollowTree(string identifier)
+        private GitObject FollowTree(string identifier, GitObjectGraph graph)
         {
             GitObject followedObject = null;
             Tree currentTree = (Tree)_currentObjectHandle;
@@ -117,19 +115,19 @@ namespace GitSpect.Cmd
                 if(blob)
                 {
                     string followedObjectSha = currentTree.Blobs.Select(x => x.SHA).ToList()[index];
-                    _objectGraph.LookupObject(followedObjectSha, out followedObject);
+                    graph.LookupObject(followedObjectSha, out followedObject);
                 }
                 else if(tree)
                 {
                     string followedObjectSha = currentTree.Trees.Select(x => x.SHA).ToList()[index];
-                    _objectGraph.LookupObject(followedObjectSha, out followedObject);
+                    graph.LookupObject(followedObjectSha, out followedObject);
                 }
             }
 
             return followedObject;
         }
 
-        private GitObject FollowCommit(string identifier)
+        private GitObject FollowCommit(string identifier, GitObjectGraph graph)
         {
             GitObject followedObject = null;
             Commit currentCommit = (Commit)_currentObjectHandle;
@@ -138,11 +136,11 @@ namespace GitSpect.Cmd
             {
                 case "Parent":
                 case "parent":
-                    _objectGraph.LookupObject(currentCommit.Parent, out followedObject);
+                    graph.LookupObject(currentCommit.Parent, out followedObject);
                     break;
                 case "Tree":
                 case "tree":
-                    _objectGraph.LookupObject(currentCommit.Tree, out followedObject);
+                    graph.LookupObject(currentCommit.Tree, out followedObject);
                     break;
                 default:
                     break;
@@ -151,11 +149,11 @@ namespace GitSpect.Cmd
             return followedObject;
         }
 
-        private GitObject FindRandomObject(GitObjects objType)
+        private GitObject FindRandomObject(GitObjects objType, GitObjectGraph graph)
         {
             GitObject randomObject;
 
-            List<GitObject> listOfType = _objectGraph.Where(x => x.Type == objType).ToList();
+            List<GitObject> listOfType = graph.Where(x => x.Type == objType).ToList();
             int maxIndex = listOfType.Count > 0 ? listOfType.Count - 1 : 0;
             int randomIndex = _rng.Next(0, maxIndex);
 
@@ -165,12 +163,12 @@ namespace GitSpect.Cmd
             return randomObject;
         }
 
-        private GitObject FindMostConnectedObject()
+        private GitObject FindMostConnectedObject(GitObjectGraph graph)
         {
             GitObject mostConnected = null;
 
-            var refCountMax = _objectGraph.Select(x => x.RefCount).ToList().Max();
-            mostConnected = _objectGraph.Where(x => x.RefCount == refCountMax).ToList().First();
+            var refCountMax = graph.Select(x => x.RefCount).ToList().Max();
+            mostConnected = graph.Where(x => x.RefCount == refCountMax).ToList().First();
 
             return mostConnected;
         }
