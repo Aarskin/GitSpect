@@ -36,13 +36,15 @@ namespace GitSpect.Cmd
             _objectGraph = headStart ? new GitObjectGraph(args[1]) : new GitObjectGraph();
             IEnumerable<PSObject> gitObjectHints;
 
-            // Get the first two letters of all the git objects 
-            // (also path and info, but we don't care about those yet)
+            // This could be a lot less wordy
             string classicCommand = quickDebug ?
-                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_LAST_5_MINUTES) :
-                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.GET_ALL);
+                string.Format(PowerShellCommands.CD_BASE + "; " + 
+                PowerShellCommands.GET_LAST_5_MINUTES) :
+                string.Format(PowerShellCommands.CD_BASE + "; " + 
+                PowerShellCommands.GET_ALL);
             string headStartCommand = headStart ? 
-                string.Format(PowerShellCommands.CD_BASE + "; " + PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
+                string.Format(PowerShellCommands.CD_BASE + "; " + 
+                PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0,2)) : 
                 string.Empty;
             string poshCommand = headStart ? headStartCommand : classicCommand; 
 
@@ -60,7 +62,9 @@ namespace GitSpect.Cmd
                 bool firstObjInDirectory = true;
                 Stopwatch objTimer = new Stopwatch();
                 objTimer.Start();
-                IEnumerable<GitObject> gitObjs = headStart ? _objectGraph.TraverseStartingAtCommit(headStartSha, 15) : _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
+                IEnumerable<GitObject> gitObjs = headStart ? 
+                    _objectGraph.TraverseStartingAtCommit(headStartSha, 15) : 
+                    _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
                 objTimer.Stop();
 
                 foreach (var gitObj in gitObjs)
@@ -134,21 +138,25 @@ namespace GitSpect.Cmd
             {
                 string handle = processor.CurrentHandle;
                 Console.Write("{0}> ", handle);
+
+                // Fragile
                 string[] cmdArgs = null;
-                string[] command = GetCommand();
-                string strCommand = command[0];
-                string hopefullyParseable = strCommand.ToLower().ToTitleCase();
+                string command = GetCommand();
+                string[] cmd = command.Split(' ');
+                string hopefullyParseable = command.ToLower().ToTitleCase();
+                string[] parsed = hopefullyParseable.Split(' ');
+
                 Commands mainCommand = Commands.Unknown;
                 // Empty string parses to "MostConnected"...
                 Enum.TryParse(hopefullyParseable, out mainCommand);
 
-                if(command.Length > 1)
+                if(cmd.Length > 1)
                 {
-                    cmdArgs = new string[command.Length - 1];
+                    cmdArgs = new string[cmd.Length - 1];
 
-                    for(int i = 1; i < command.Length; i++)
+                    for(int i = 1; i < cmd.Length; i++)
                     {
-                        cmdArgs[i-1] = command[i];
+                        cmdArgs[i-1] = cmd[i];
                     }
                 }
 
@@ -158,13 +166,10 @@ namespace GitSpect.Cmd
             }
         }
 
-        private static string[] GetCommand()
+        private static string GetCommand()
         {
-            string[] retVal = null;
-
-            string stringCommand = Console.ReadLine();
-            retVal = stringCommand.Split(' ');
-
+            string retVal = null;
+            retVal = Console.ReadLine();
             return retVal;
         }       
 
