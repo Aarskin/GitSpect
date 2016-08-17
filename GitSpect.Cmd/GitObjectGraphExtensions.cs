@@ -143,7 +143,7 @@ namespace GitSpect.Cmd
                     Parent = null,
                     Author = rawCommit[1].BaseObject.ToString().Split(' ')[1],
                     Committer = rawCommit[2].BaseObject.ToString().Split(' ')[1],
-                    Message = rawCommit[4].BaseObject.ToString().Split(' ')[1],
+                    Message = rawCommit[4].BaseObject.ToString()
                 };
             }
             else if(mergeCommit)
@@ -157,7 +157,7 @@ namespace GitSpect.Cmd
                     ParentB = rawCommit[2].BaseObject.ToString().Split(' ')[1],
                     Author = rawCommit[3].BaseObject.ToString().Split(' ')[1],
                     Committer = rawCommit[4].BaseObject.ToString().Split(' ')[1],
-                    Message = rawCommit[6].BaseObject.ToString().Split(' ')[1]
+                    Message = rawCommit[6].BaseObject.ToString()
                 };
             }
             else
@@ -170,7 +170,7 @@ namespace GitSpect.Cmd
                     Parent = rawCommit[1].BaseObject.ToString().Split(' ')[1],
                     Author = rawCommit[2].BaseObject.ToString().Split(' ')[1],
                     Committer = rawCommit[3].BaseObject.ToString().Split(' ')[1],
-                    Message = rawCommit[5].BaseObject.ToString().Split(' ')[1]
+                    Message = rawCommit[5].BaseObject.ToString()
                 };
             }
 
