@@ -134,7 +134,7 @@ namespace GitSpect.Cmd
                     }
 
                     // Yup, this is how the headstart starting depth limit is hardcoded
-                } while (headStart && depthTracker++ < 5);
+                } while (headStart && ++depthTracker < 3);
 
                 allObjsTimer.Stop();
 
