@@ -54,6 +54,10 @@ namespace GitSpect.Cmd
             // Get our starting PSObject(s) - two character folder name(s)
             gitObjectHints = ExecuteCommand(poshCommand);
 
+            gitObjectHints = headStart ? 
+                gitObjectHints.Where(x => x.ToString() == headStartSha.Substring(0,2)).ToList() : 
+                gitObjectHints;
+
             Stopwatch allObjsTimer = new Stopwatch();
             int totalSizeOfAllGraphObjects = 0;
             int totalNumberOfGraphObjects = 0;
