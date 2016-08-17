@@ -29,8 +29,6 @@ namespace GitSpect.Cmd
             string quickDebugStatus = quickDebug ? "On" : "Off";
             string headStartStatus = headStart ? args[1].Substring(0, 5) : "Off";
             string welcomeHeader = string.Format("GitSpect ALPHA | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
-            Stopwatch firstLoad = new Stopwatch();
-            firstLoad.Start();
 
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
@@ -44,15 +42,10 @@ namespace GitSpect.Cmd
                 PowerShellCommands.GET_LAST_5_MINUTES) :
                 string.Format(PowerShellCommands.CD_BASE + "; " +
                 PowerShellCommands.GET_ALL);
-            string headStartCommand = headStart ?
-                string.Format(PowerShellCommands.CD_BASE + "; " +
-                PowerShellCommands.OBJECT_TEMPLATE, headStartSha.Substring(0, 2)) :
-                string.Empty;
-            string poshCommand = headStart ? headStartCommand : classicCommand;
 
             // Note : HeadStart setting overrides QuickDebug 
             // Get our starting PSObject(s) - two character folder name(s)
-            gitObjectHints = ExecuteCommand(poshCommand);
+            gitObjectHints = ExecuteCommand(classicCommand);
 
             gitObjectHints = headStart ? 
                 gitObjectHints.Where(x => x.ToString() == headStartSha.Substring(0,2)).ToList() : 
