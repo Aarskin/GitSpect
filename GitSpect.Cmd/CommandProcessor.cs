@@ -14,7 +14,8 @@ namespace GitSpect.Cmd
         public string CurrentHandle { get
             {
                 string handle = _currentObjectHandle != null ? 
-                    _currentObjectHandle.SHA.Substring(0, 5) : "NULL";
+                    _currentObjectHandle.Type + " | " + _currentObjectHandle.SHA.Substring(0, 5) : 
+                    "NULL";
                 return handle;
             }
         }
