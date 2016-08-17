@@ -29,6 +29,8 @@ namespace GitSpect.Cmd
             string quickDebugStatus = quickDebug ? "On" : "Off";
             string headStartStatus = headStart ? args[1].Substring(0, 5) : "Off";
             string welcomeHeader = string.Format("GitSpect ALPHA | QuickDebug {0} | HeadStart {1}", quickDebugStatus, headStartStatus);
+            Stopwatch firstLoad = new Stopwatch();
+            firstLoad.Start();
 
             Console.WriteLine(ONE_LINE_TO_RULE_THEM_ALL);
             Console.WriteLine(welcomeHeader);
@@ -65,13 +67,13 @@ namespace GitSpect.Cmd
                 do
                 {
                     bool firstObjInDirectory = true;
-                    Stopwatch objTimer = new Stopwatch();
+                    Stopwatch dirTimer = new Stopwatch();
 
-                    objTimer.Start();
+                    dirTimer.Start();
                     IEnumerable<GitObject> gitObjs = headStart ?
                         _objectGraph.SloppyLoadCommit(currentCommitSha, true) :
                         _objectGraph.ProcessPSObjectIntoGitObjects(hint.ToString());
-                    objTimer.Stop();
+                    dirTimer.Stop();
 
                     foreach (var gitObj in gitObjs)
                     {
@@ -114,7 +116,7 @@ namespace GitSpect.Cmd
                     }
 
                     string parsedDirectory = headStart ? currentCommitSha.Substring(0, 2) : hint.ToString();
-                    string stats = string.Format("Directory {0} parsed. Took {1} ms", parsedDirectory, objTimer.ElapsedMilliseconds);
+                    string stats = string.Format("Directory {0} parsed. Took {1} ms", parsedDirectory, dirTimer.ElapsedMilliseconds);
                     Console.Write(stats);
                     Console.WriteLine();
 
