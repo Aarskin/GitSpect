@@ -65,10 +65,11 @@ namespace GitSpect.Cmd
                     Console.WriteLine("Invalid command. Type ? for help.");
                     break;
                 default:
-                    Console.WriteLine("Unknown command: '{0}'", command);
+                    Console.WriteLine("Unknown command.");
                     break;
             }
 
+            // Stay the same if the command failed, otherwise, update to the result.
             _currentObjectHandle = retVal == null ? _currentObjectHandle : retVal;
 
             return retVal;

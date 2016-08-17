@@ -178,7 +178,7 @@ namespace GitSpect.Cmd
                     }
 
                     var result = processor.Process(mainCommand, _objectGraph, cmdArgs);
-                    string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found" : result.ToString();
+                    string report = result == null || string.IsNullOrEmpty(result.SHA) ? "No Object Found." : result.ToString();
                     Console.WriteLine(report);
                 }
             }

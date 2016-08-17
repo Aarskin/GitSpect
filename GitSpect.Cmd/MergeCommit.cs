@@ -27,7 +27,6 @@ namespace GitSpect.Cmd
             prettyPrint.AppendLine(parentBLine);
             prettyPrint.AppendLine(treeLine);
             prettyPrint.AppendLine(messageLine);
-            prettyPrint.AppendLine();
 
             return prettyPrint.ToString();
         }
